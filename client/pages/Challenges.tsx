@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Zap, Plus, Link as LinkIcon } from "lucide-react";
 import { apiClient } from "@/lib/axios";
 import SelfieUploadModal from "@/components/SelfieUploadModal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Challenges() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function Challenges() {
   const [error, setError] = useState("");
   const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchChallenges = async () => {
@@ -27,8 +29,8 @@ export default function Challenges() {
 
   return (
     <AppLayout
-      title="Challenges"
-      description="Discover and participate in user-created challenges"
+      title={t.challenges.title}
+      description={t.challenges.description}
     >
       <div className="space-y-6">
         {/* Create Challenge Button */}
@@ -38,7 +40,7 @@ export default function Challenges() {
             className="bg-white/20 hover:bg-white/30 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Create Challenge
+            {t.challenges.createChallenge}
           </Button>
         </div>
 
@@ -78,18 +80,18 @@ export default function Challenges() {
                 <div className="grid grid-cols-3 gap-4 mb-4 text-center py-4 border-t border-b border-border/40">
                   <div>
                     <p className="text-2xl font-bold text-white">{challenge.participantsCount || challenge.participants || 0}</p>
-                    <p className="text-xs text-muted-foreground">Participants</p>
+                    <p className="text-xs text-muted-foreground">{t.challenges.participants}</p>
                   </div>
                   <div>
                     <p className="text-lg font-bold text-white">{challenge.theme}</p>
-                    <p className="text-xs text-muted-foreground">Theme</p>
+                    <p className="text-xs text-muted-foreground">{t.challenges.theme}</p>
                   </div>
                   <div>
                     <p className="text-lg font-bold text-white">
-                      {challenge.isActive ? daysLeft(challenge.endDate) : "Ended"}
+                      {challenge.isActive ? daysLeft(challenge.endDate) : t.challenges.ended}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {challenge.isActive ? "Ends" : "Status"}
+                      {challenge.isActive ? t.challenges.ends : t.challenges.status}
                     </p>
                   </div>
                 </div>
@@ -101,7 +103,7 @@ export default function Challenges() {
                     className="flex-1 border-white/20 text-white hover:bg-white/10"
                   >
                     <LinkIcon className="h-4 w-4 mr-2" />
-                    View
+                    {t.challenges.view}
                   </Button>
                   <Button
                     onClick={() => {
@@ -111,7 +113,7 @@ export default function Challenges() {
                     disabled={!challenge.isActive}
                     className="flex-1 bg-white/20 hover:bg-white/30 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {challenge.isActive ? "Participate" : "Ended"}
+                    {challenge.isActive ? t.challenges.participate : t.challenges.ended}
                   </Button>
                 </div>
               </div>
@@ -123,8 +125,8 @@ export default function Challenges() {
         {challenges.length === 0 && (
           <div className="p-8 rounded-xl border border-border/40 bg-transparent backdrop-blur-sm text-center">
             <Calendar className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
-            <h3 className="text-lg font-bold mb-2">No challenges available</h3>
-            <p className="text-muted-foreground">Check back soon for new challenges and opportunities to compete</p>
+            <h3 className="text-lg font-bold mb-2">{t.challenges.noChallenge}</h3>
+            <p className="text-muted-foreground">{t.challenges.noChallengeDesc}</p>
           </div>
         )}
       </div>

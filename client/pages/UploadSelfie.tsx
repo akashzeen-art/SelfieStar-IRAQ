@@ -8,11 +8,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import SelfieUploadModal from "@/components/SelfieUploadModal";
 import VideoBackground from "@/components/VideoBackground";
 import Footer from "@/components/Footer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function UploadSelfie() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { t } = useLanguage();
 
   if (!isAuthenticated) {
     navigate("/login");
@@ -31,7 +33,7 @@ export default function UploadSelfie() {
               onClick={() => navigate("/dashboard")}
               className="text-muted-foreground hover:text-foreground"
             >
-              ← Back to Dashboard
+              {t.upload.backToDashboard}
             </Button>
           </div>
 
@@ -40,12 +42,8 @@ export default function UploadSelfie() {
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 border border-white/30 mx-auto mb-6 shadow-lg shadow-white/20">
               <Camera className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Upload Your Selfie
-            </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Show the world your best self! Capture a moment, apply filters, and get AI-powered scoring.
-            </p>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{t.upload.title}</h1>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">{t.upload.subtitle}</p>
           </div>
 
           {/* Upload Card */}
@@ -56,10 +54,8 @@ export default function UploadSelfie() {
                   <Sparkles className="h-12 w-12 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold mb-2">Ready to Shine?</h2>
-                  <p className="text-muted-foreground">
-                    Click below to start your selfie journey
-                  </p>
+                  <h2 className="text-2xl font-bold mb-2">{t.upload.readyToShine}</h2>
+                  <p className="text-muted-foreground">{t.upload.clickBelow}</p>
                 </div>
               </div>
 
@@ -68,49 +64,38 @@ export default function UploadSelfie() {
                 size="lg"
                 className="bg-white text-black hover:bg-white/90 border border-white/30 px-8 py-6 text-lg shadow-lg shadow-white/20 hover:scale-105 transition-transform"
               >
-                <Camera className="mr-2 h-5 w-5" />
-                Start Upload
+                <Camera className="mr-2 h-5 w-5" />{t.upload.startUpload}
               </Button>
 
               {/* Features Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-12 pt-8 border-t border-border/40">
                 <div className="text-center p-5 rounded-lg bg-card/50 border border-border/20 hover:border-neon-purple/50 transition-colors">
                   <div className="text-3xl mb-3">✨</div>
-                  <h3 className="font-semibold mb-2">AI Beautification</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Skin smoothing, blemish removal, face reshaping
-                  </p>
+                  <h3 className="font-semibold mb-2">{t.upload.aiBeautification}</h3>
+                  <p className="text-sm text-muted-foreground">{t.upload.aiBeautificationDesc}</p>
                 </div>
                 <div className="text-center p-5 rounded-lg bg-card/50 border border-border/20 hover:border-neon-cyan/50 transition-colors">
                   <div className="text-3xl mb-3">🎭</div>
-                  <h3 className="font-semibold mb-2">AR Face Tracking</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Interactive stickers that move with your face
-                  </p>
+                  <h3 className="font-semibold mb-2">{t.upload.arFaceTracking}</h3>
+                  <p className="text-sm text-muted-foreground">{t.upload.arFaceTrackingDesc}</p>
                 </div>
                 <div className="text-center p-5 rounded-lg bg-card/50 border border-border/20 hover:border-neon-pink/50 transition-colors">
                   <div className="text-3xl mb-3">📸</div>
-                  <h3 className="font-semibold mb-2">Live Filters</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Real-time Retro, Vintage, B&W, Warm, Cool filters
-                  </p>
+                  <h3 className="font-semibold mb-2">{t.upload.liveFilters}</h3>
+                  <p className="text-sm text-muted-foreground">{t.upload.liveFiltersDesc}</p>
                 </div>
                 <div className="text-center p-5 rounded-lg bg-card/50 border border-border/20 hover:border-orange-500/50 transition-colors">
                   <div className="text-3xl mb-3">🎬</div>
-                  <h3 className="font-semibold mb-2">Video Recording</h3>
-                  <p className="text-sm text-muted-foreground">
-                    15-second videos with beauty filters
-                  </p>
+                  <h3 className="font-semibold mb-2">{t.upload.videoRecording}</h3>
+                  <p className="text-sm text-muted-foreground">{t.upload.videoRecordingDesc}</p>
                 </div>
                 <div className="text-center p-5 rounded-lg bg-transparent backdrop-blur-sm border border-border/20 hover:border-green-500/50 transition-colors">
                   <div className="text-3xl mb-3">🖼️</div>
                 </div>
                 <div className="text-center p-5 rounded-lg bg-card/50 border border-border/20 hover:border-neon-purple/50 transition-colors">
                   <div className="text-3xl mb-3">🏆</div>
-                  <h3 className="font-semibold mb-2">AI Scoring</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Get instant AI-powered scores & compete
-                  </p>
+                  <h3 className="font-semibold mb-2">{t.upload.aiScoring}</h3>
+                  <p className="text-sm text-muted-foreground">{t.upload.aiScoringDesc}</p>
                 </div>
               </div>
             </div>

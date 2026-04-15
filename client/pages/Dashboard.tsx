@@ -5,11 +5,13 @@ import SelfieUploadModal from "@/components/SelfieUploadModal";
 import { Button } from "@/components/ui/button";
 import { Camera, Star, TrendingUp, Award, Trash2, Heart } from "lucide-react";
 import { useSelfies } from "@/contexts/SelfieContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Dashboard() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [error, setError] = useState("");
   const { selfies, getAverageScore, getBestScore, deleteSelfie, refreshMine } = useSelfies();
+  const { t } = useLanguage();
 
   useEffect(() => {
     refreshMine().catch((err) => {
@@ -18,16 +20,16 @@ export default function Dashboard() {
   }, []);
 
   const stats = [
-    { label: "Total Selfies", value: selfies.length.toString(), icon: Star },
-    { label: "Avg Score", value: getAverageScore() > 0 ? `${getAverageScore()}%` : "--", icon: TrendingUp },
-    { label: "Best Score", value: getBestScore() > 0 ? `${getBestScore()}` : "--", icon: Award },
-    { label: "Challenge Wins", value: "0", icon: Camera },
+    { label: t.dashboard.totalSelfies, value: selfies.length.toString(), icon: Star },
+    { label: t.dashboard.avgScore, value: getAverageScore() > 0 ? `${getAverageScore()}%` : "--", icon: TrendingUp },
+    { label: t.dashboard.bestScore, value: getBestScore() > 0 ? `${getBestScore()}` : "--", icon: Award },
+    { label: t.dashboard.challengeWins, value: "0", icon: Camera },
   ];
 
   return (
     <AppLayout
-      title="Dashboard"
-      description="Your selfie journey starts here. Upload, score, and shine!"
+      title={t.dashboard.title}
+      description={t.dashboard.description}
     >
       <div className="space-y-6 md:space-y-8 animate-fade-in">
         {error && (
@@ -38,7 +40,7 @@ export default function Dashboard() {
         {/* Upload Section */}
         <div className="p-6 md:p-8 rounded-xl border border-white/20 bg-transparent backdrop-blur-sm text-center animate-slide-up hover:border-white/50 transition-smooth">
           <Camera className="h-16 w-16 text-white mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Ready to score your selfie?</h2>
+          <h2 className="text-2xl font-bold mb-2">{t.dashboard.readyToScore}</h2>
           <p className="text-muted-foreground mb-6">
             Upload a photo and let our AI analyze your star potential
           </p>
@@ -48,14 +50,14 @@ export default function Dashboard() {
               className="bg-white text-black hover:bg-white/90 border border-white/30 px-8 py-2 text-base hover:scale-105 transition-transform shadow-lg shadow-white/20"
             >
               <Camera className="mr-2 h-5 w-5" />
-              Quick Upload
+              {t.dashboard.quickUpload}
             </Button>
             <Link to="/upload">
               <Button
                 variant="outline"
                 className="border-white/30 hover:bg-white/10 text-white px-8 py-2 text-base hover:scale-105 transition-transform"
               >
-                Full Upload Page →
+                {t.dashboard.fullUploadPage}
               </Button>
             </Link>
           </div>
@@ -121,7 +123,7 @@ export default function Dashboard() {
                     )}
                     <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
                       <span>{new Date(selfie.createdAt).toLocaleDateString()}</span>
-                      <span>{selfie.isPublic ? "Public" : "Private"}</span>
+                      <span>{selfie.isPublic ? t.dashboard.public : t.dashboard.private}</span>
                     </div>
 
                     {/* Stats */}
@@ -130,7 +132,7 @@ export default function Dashboard() {
                         <Heart className="h-4 w-4" />
                         {selfie.likes}
                       </span>
-                      <span>{selfie.comments} comments</span>
+                      <span>{selfie.comments} {t.dashboard.comments}</span>
                     </div>
 
                     {/* Delete Button */}
@@ -141,7 +143,7 @@ export default function Dashboard() {
                       className="w-full text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
+                      {t.dashboard.delete}
                     </Button>
                   </div>
                 </div>
@@ -153,22 +155,20 @@ export default function Dashboard() {
         {/* Additional Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="p-6 rounded-xl border border-white/20 bg-transparent backdrop-blur-sm">
-            <h3 className="text-lg font-bold mb-2">Quick Tips</h3>
+            <h3 className="text-lg font-bold mb-2">{t.dashboard.quickTips}</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>✓ Good lighting improves your score</li>
-              <li>✓ Center your face for better analysis</li>
-              <li>✓ Natural smile increases ratings</li>
+              <li>{t.dashboard.tip1}</li>
+              <li>{t.dashboard.tip2}</li>
+              <li>{t.dashboard.tip3}</li>
             </ul>
           </div>
 
           <div className="p-6 rounded-xl border border-white/20 bg-transparent backdrop-blur-sm">
-            <h3 className="text-lg font-bold mb-2">Next Challenge</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Check out active challenges to win rewards and climb the leaderboard
-            </p>
+            <h3 className="text-lg font-bold mb-2">{t.dashboard.nextChallenge}</h3>
+            <p className="text-sm text-muted-foreground mb-4">{t.dashboard.nextChallengeDesc}</p>
             <Link to="/challenges">
               <Button variant="outline" className="w-full text-sm border-white/20 text-white hover:bg-white/10">
-                View Challenges →
+                {t.dashboard.viewChallenges}
               </Button>
             </Link>
           </div>

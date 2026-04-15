@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import VideoBackground from "@/components/VideoBackground";
 import Footer from "@/components/Footer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -16,28 +17,29 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState("");
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (!username || !email || !password || !confirmPassword) {
-      setError("Please fill in all fields");
+      setError(t.register.fillFields);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t.register.passwordMismatch);
       return;
     }
 
     if (!isStrongPassword(password)) {
-      setError("Password must be at least 8 chars and include uppercase, lowercase, and a number.");
+      setError(t.register.weakPassword);
       return;
     }
 
     if (!agreeTerms) {
-      setError("Please agree to the Terms of Service");
+      setError(t.register.agreeTermsError);
       return;
     }
 
@@ -45,7 +47,7 @@ export default function Register() {
       await register(email, username, password);
       navigate("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
+      setError(err instanceof Error ? err.message : t.register.registerFailed);
       console.error(err);
     }
   };
@@ -64,7 +66,7 @@ export default function Register() {
           <h1 className="text-3xl font-bold text-white mb-2">
             SelfiStar
           </h1>
-          <p className="text-muted-foreground">Join millions of Stars</p>
+          <p className="text-muted-foreground">{t.register.joinStars}</p>
         </div>
 
         {/* Register Form */}
@@ -77,7 +79,7 @@ export default function Register() {
             )}
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Username</label>
+              <label className="text-sm font-medium mb-2 block">{t.register.username}</label>
               <Input
                 type="text"
                 placeholder="your_selfie_name"
@@ -89,7 +91,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Email</label>
+              <label className="text-sm font-medium mb-2 block">{t.register.email}</label>
               <Input
                 type="email"
                 placeholder="your@email.com"
@@ -101,7 +103,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Password</label>
+              <label className="text-sm font-medium mb-2 block">{t.register.password}</label>
               <Input
                 type="password"
                 placeholder="••••••••"
@@ -110,13 +112,11 @@ export default function Register() {
                 disabled={isLoading}
                 className="bg-input border-border/40 focus:border-white/60"
               />
-              <p className="mt-2 text-xs text-muted-foreground">
-                Must include uppercase, lowercase, number, min 8 characters.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{t.register.passwordHint}</p>
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Confirm Password</label>
+              <label className="text-sm font-medium mb-2 block">{t.register.confirmPassword}</label>
               <Input
                 type="password"
                 placeholder="••••••••"
@@ -136,10 +136,8 @@ export default function Register() {
                 className="rounded border-border/40"
               />
               <span>
-                I agree to the{" "}
-                <a href="#" className="text-white hover:text-white/80">
-                  Terms of Service
-                </a>
+                {t.register.agreeTerms}{" "}
+                <a href="#" className="text-white hover:text-white/80">{t.register.termsOfService}</a>
               </span>
             </div>
 
@@ -151,27 +149,25 @@ export default function Register() {
               {isLoading ? (
                 <>
                   <Loader className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Account...
+                  {t.register.creatingAccount}
                 </>
               ) : (
-                "Create Account"
+                t.register.createAccount
               )}
             </Button>
           </form>
 
           <div className="mt-6 pt-6 border-t border-border/40 text-center">
             <p className="text-muted-foreground text-sm">
-              Already a Star?{" "}
-              <Link to="/login" className="text-white hover:text-white/80 font-medium">
-                Sign in
-              </Link>
+              {t.register.alreadyStar}{" "}
+              <Link to="/login" className="text-white hover:text-white/80 font-medium">{t.register.signIn}</Link>
             </p>
           </div>
         </div>
 
           <div className="text-center mt-6">
             <Link to="/" className="text-muted-foreground hover:text-foreground text-sm">
-              ← Back to home
+              {t.register.backHome}
             </Link>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Loader, Sparkles } from "lucide-react";
 import { apiClient } from "@/lib/axios";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CreateChallenge() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function CreateChallenge() {
     winningReward: "",
   });
   const [calculatedEndDate, setCalculatedEndDate] = useState<string>("");
+  const { t } = useLanguage();
 
   const updateEndDate = (start: string, durationDays: string) => {
     if (!start) {
@@ -86,20 +88,18 @@ export default function CreateChallenge() {
 
   return (
     <AppLayout
-      title="Create Challenge"
-      description="Start your own challenge and invite others to participate"
+      title={t.createChallenge.title}
+      description={t.createChallenge.description}
     >
       <div className="max-w-2xl mx-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium mb-2 text-white">
-              Challenge Title *
-            </label>
+            <label className="block text-sm font-medium mb-2 text-white">{t.createChallenge.challengeTitle}</label>
             <Input
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="e.g., Summer Selfie Challenge"
+              placeholder={t.createChallenge.titlePlaceholder}
               required
               minLength={3}
               maxLength={120}
@@ -111,9 +111,7 @@ export default function CreateChallenge() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2 text-white">
-                  Start Date *
-                </label>
+                <label className="block text-sm font-medium mb-2 text-white">{t.createChallenge.startDate}</label>
                 <Input
                   type="datetime-local"
                   value={formData.startDate}
@@ -127,9 +125,7 @@ export default function CreateChallenge() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2 text-white">
-                  Duration *
-                </label>
+                <label className="block text-sm font-medium mb-2 text-white">{t.createChallenge.duration}</label>
                 <select
                   value={formData.duration}
                   onChange={(e) => {
@@ -139,32 +135,28 @@ export default function CreateChallenge() {
                   }}
                   className="w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm text-white"
                 >
-                  <option value="1">1 Day</option>
-                  <option value="3">3 Days</option>
-                  <option value="7">7 Days</option>
+                  <option value="1">{t.createChallenge.day1}</option>
+                  <option value="3">{t.createChallenge.day3}</option>
+                  <option value="7">{t.createChallenge.day7}</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-white">
-                End Date (Auto)
-              </label>
+              <label className="block text-sm font-medium mb-1 text-white">{t.createChallenge.endDateAuto}</label>
               <div className="w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 text-sm text-white/80">
-                {calculatedEndDate || "Select a start date and duration"}
+                {calculatedEndDate || t.createChallenge.selectStartDate}
               </div>
             </div>
           </div>
 
           {/* Winning Reward */}
           <div>
-            <label className="block text-sm font-medium mb-2 text-white">
-              Winning Reward *
-            </label>
+            <label className="block text-sm font-medium mb-2 text-white">{t.createChallenge.winningReward}</label>
             <Input
               value={formData.winningReward}
               onChange={(e) => setFormData({ ...formData, winningReward: e.target.value })}
-              placeholder="e.g., Amazon Voucher ₹500"
+              placeholder={t.createChallenge.rewardPlaceholder}
               required
               minLength={3}
               maxLength={200}
@@ -181,13 +173,11 @@ export default function CreateChallenge() {
             >
               {isLoading ? (
                 <>
-                  <Loader className="h-4 w-4 mr-2 animate-spin" />
-                  Creating...
+                  <Loader className="h-4 w-4 mr-2 animate-spin" />{t.createChallenge.creating}
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Create Challenge
+                  <Sparkles className="h-4 w-4 mr-2" />{t.createChallenge.createChallenge}
                 </>
               )}
             </Button>
@@ -197,7 +187,7 @@ export default function CreateChallenge() {
               onClick={() => navigate("/challenges")}
               className="border-white/20 text-white hover:bg-white/10"
             >
-              Cancel
+              {t.createChallenge.cancel}
             </Button>
           </div>
         </form>

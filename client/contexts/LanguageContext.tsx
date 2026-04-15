@@ -1,4 +1,8 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import en from "@/locales/en";
+import fr from "@/locales/fr";
+import ar from "@/locales/ar";
+import es from "@/locales/es";
 
 export type Language = "en" | "fr" | "ar" | "es";
 
@@ -9,14 +13,20 @@ export const LANGUAGES: { code: Language; label: string; flag: string }[] = [
   { code: "es", label: "Español", flag: "🇪🇸" },
 ];
 
+const translations = { en, fr, ar, es };
+
+type Translations = typeof en;
+
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
+  t: Translations;
 }
 
 const LanguageContext = createContext<LanguageContextType>({
   language: "en",
   setLanguage: () => {},
+  t: en,
 });
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
@@ -30,7 +40,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage }}>
+    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t: translations[language] }}>
       {children}
     </LanguageContext.Provider>
   );

@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import VideoBackground from "@/components/VideoBackground";
 import Footer from "@/components/Footer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { t } = useLanguage();
 
   // Redirect after successful login
   useEffect(() => {
@@ -35,7 +37,7 @@ export default function Login() {
     setError("");
 
     if (!email || !password) {
-      setError("Please fill in all fields");
+      setError(t.login.fillFields);
       return;
     }
 
@@ -43,7 +45,7 @@ export default function Login() {
       await login(email, password);
       // The useEffect will handle the redirect after user state updates
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed. Please try again.");
+      setError(err instanceof Error ? err.message : t.login.loginFailed);
       console.error(err);
     }
   };
@@ -62,7 +64,7 @@ export default function Login() {
           <h1 className="text-3xl font-bold text-white mb-2">
             SelfiStar
           </h1>
-          <p className="text-muted-foreground">Welcome back, Star!</p>
+          <p className="text-muted-foreground">{t.login.welcome}</p>
         </div>
 
         {/* Login Form */}
@@ -75,7 +77,7 @@ export default function Login() {
             )}
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Email</label>
+              <label className="text-sm font-medium mb-2 block">{t.login.email}</label>
               <Input
                 type="email"
                 autoComplete="email"
@@ -88,7 +90,7 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Password</label>
+              <label className="text-sm font-medium mb-2 block">{t.login.password}</label>
               <Input
                 type="password"
                 autoComplete="current-password"
@@ -103,15 +105,15 @@ export default function Login() {
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2">
                 <input type="checkbox" className="rounded border-border/40" disabled={isLoading} />
-                <span>Remember me</span>
+                <span>{t.login.rememberMe}</span>
               </label>
               <a href="#" className="text-neon-purple hover:text-neon-purple/80">
-                Forgot password?
+                {t.login.forgotPassword}
               </a>
             </div>
 
             <div className="rounded-lg border border-neon-cyan/30 bg-neon-cyan/5 p-3 text-xs text-muted-foreground">
-              <strong>Note:</strong> Login to access your dashboard and start uploading selfies.
+              <strong>Note:</strong> {t.login.note}
             </div>
 
             <Button
@@ -122,19 +124,19 @@ export default function Login() {
               {isLoading ? (
                 <>
                   <Loader className="mr-2 h-4 w-4 animate-spin" />
-                  Signing In...
+                  {t.login.signingIn}
                 </>
               ) : (
-                "Sign In"
+                t.login.signIn
               )}
             </Button>
           </form>
 
           <div className="mt-6 pt-6 border-t border-border/40 text-center">
             <p className="text-muted-foreground text-sm">
-              Not a Star yet?{" "}
+              {t.login.noAccount}{" "}
               <Link to="/register" className="text-neon-purple hover:text-neon-purple/80 font-medium">
-                Create account
+                {t.login.createAccount}
               </Link>
             </p>
           </div>
@@ -142,7 +144,7 @@ export default function Login() {
 
           <div className="text-center mt-6">
             <Link to="/" className="text-muted-foreground hover:text-foreground text-sm">
-              ← Back to home
+              {t.login.backHome}
             </Link>
           </div>
         </div>
