@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Star, Camera, Trophy, Users, Zap, LogOut, User } from "lucide-react";
+import { Star, Camera, Trophy, Zap, LogOut, User } from "lucide-react";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import VideoBackground from "@/components/VideoBackground";
+import LanguageDropdown from "@/components/LanguageDropdown";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -58,7 +60,8 @@ export default function AppLayout({ children, title, description }: AppLayoutPro
             </Link>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <LanguageDropdown />
             <Button
               variant="ghost"
               size="sm"
@@ -98,7 +101,7 @@ export default function AppLayout({ children, title, description }: AppLayoutPro
       </div>
 
       {/* Main Content */}
-      <main className="pt-20 pb-24 md:pb-0 px-4 sm:px-6 lg:px-8">
+      <main className="pt-20 pb-24 md:pb-8 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           {title && (
             <div className="mb-8 pt-8">
@@ -111,6 +114,7 @@ export default function AppLayout({ children, title, description }: AppLayoutPro
           {children}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

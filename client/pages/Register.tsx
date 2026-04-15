@@ -5,6 +5,7 @@ import { Star, Loader } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import VideoBackground from "@/components/VideoBackground";
+import Footer from "@/components/Footer";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -50,10 +51,11 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative">
+    <div className="min-h-screen flex flex-col relative">
       <VideoBackground />
 
-      <div className="w-full max-w-md">
+      <div className="flex-1 flex items-center justify-center px-4 py-24">
+        <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20 border border-white/30 mx-auto mb-4">
@@ -167,13 +169,14 @@ export default function Register() {
           </div>
         </div>
 
-        {/* Back Home */}
-        <div className="text-center mt-6">
-          <Link to="/" className="text-muted-foreground hover:text-foreground text-sm">
-            ← Back to home
-          </Link>
+          <div className="text-center mt-6">
+            <Link to="/" className="text-muted-foreground hover:text-foreground text-sm">
+              ← Back to home
+            </Link>
+          </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

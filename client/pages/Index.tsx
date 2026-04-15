@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Star, Camera, Zap, Users, Trophy } from "lucide-react";
 import VideoBackground from "@/components/VideoBackground";
+import LanguageDropdown from "@/components/LanguageDropdown";
 
 export default function Index() {
   return (
@@ -18,15 +19,11 @@ export default function Index() {
               SelfiStar
             </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <LanguageDropdown />
             <Link to="/login">
-              <Button variant="ghost" className="text-sm">
-                Login
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button className="bg-white text-black hover:bg-white/90 border border-white/30">
-                Sign Up
+              <Button className="bg-white text-black hover:bg-white/90 border border-white/30 text-sm px-5">
+                Login / Sign Up
               </Button>
             </Link>
           </div>

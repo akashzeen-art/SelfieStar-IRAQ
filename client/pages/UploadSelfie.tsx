@@ -7,6 +7,7 @@ import { apiClient } from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import SelfieUploadModal from "@/components/SelfieUploadModal";
 import VideoBackground from "@/components/VideoBackground";
+import Footer from "@/components/Footer";
 
 export default function UploadSelfie() {
   const navigate = useNavigate();
@@ -19,11 +20,9 @@ export default function UploadSelfie() {
   }
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen flex flex-col relative">
       <VideoBackground />
-
-      {/* Header */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Navigation */}
           <div className="mb-8">
@@ -118,9 +117,8 @@ export default function UploadSelfie() {
           </div>
         </div>
       </div>
-
-      {/* Upload Modal */}
       <SelfieUploadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <Footer />
     </div>
   );
 }

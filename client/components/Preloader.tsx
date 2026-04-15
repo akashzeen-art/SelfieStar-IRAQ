@@ -4,8 +4,7 @@ import { cn } from "@/lib/utils";
 const PRELOADER_DURATION_MS = 5000;
 const MOBILE_BREAKPOINT = 768;
 
-const DESKTOP_VIDEO = "/desktopbgvideo.mp4";
-const MOBILE_VIDEO = "/mobilebgvideo.mp4";
+const CDN_VIDEO = "https://vz-8b014dd7-1d8.b-cdn.net/12f12c0c-4ec8-41c6-a4c6-5afb6704d24e/play_480p.mp4";
 
 interface PreloaderProps {
   onComplete: () => void;
@@ -91,7 +90,7 @@ export default function Preloader({
         aria-label="Loading"
       >
         <source
-          src={isMobile ? MOBILE_VIDEO : DESKTOP_VIDEO}
+          src={CDN_VIDEO}
           type="video/mp4"
         />
       </video>

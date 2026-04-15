@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { SelfieProvider } from "./contexts/SelfieContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import Preloader from "@/components/Preloader";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -37,6 +38,7 @@ const App = () => {
       )}
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
+          <LanguageProvider>
           <AuthProvider>
             <SelfieProvider>
               <Toaster />
@@ -125,6 +127,7 @@ const App = () => {
           </BrowserRouter>
         </SelfieProvider>
       </AuthProvider>
+      </LanguageProvider>
     </TooltipProvider>
   </QueryClientProvider>
     </>

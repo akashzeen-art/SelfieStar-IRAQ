@@ -6,9 +6,11 @@ interface VideoBackgroundProps {
   className?: string;
 }
 
+const CDN_VIDEO = "https://vz-8b014dd7-1d8.b-cdn.net/12f12c0c-4ec8-41c6-a4c6-5afb6704d24e/play_480p.mp4";
+
 export default function VideoBackground({ 
-  mobileVideoPath = "/mobilebgvideo.mp4", 
-  desktopVideoPath = "/desktopbgvideo.mp4",
+  mobileVideoPath = CDN_VIDEO, 
+  desktopVideoPath = CDN_VIDEO,
   className = "" 
 }: VideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
