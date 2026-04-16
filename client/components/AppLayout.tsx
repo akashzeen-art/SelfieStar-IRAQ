@@ -26,10 +26,7 @@ export default function AppLayout({ children, title, description }: AppLayoutPro
       <nav className="fixed top-0 z-40 w-full border-b border-border/40 bg-transparent backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 border border-white/30">
-              <Star className="h-6 w-6 fill-white text-white" />
-            </div>
-            <span className="text-xl font-bold text-white hidden sm:inline">SelfiStar</span>
+            <img src="/image.png" alt="SelfiStar" className="h-10 w-auto" />
           </Link>
 
           <div className="hidden md:flex items-center gap-1">

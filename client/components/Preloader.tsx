@@ -99,12 +99,7 @@ export default function Preloader({
 
       {/* Centered logo, welcome text and loading bar */}
       <div className="relative z-10 flex flex-col items-center gap-4 px-6 text-center text-white">
-        {/* Logo (text-based for now) */}
-        <div className="flex items-center justify-center rounded-full border border-white/40 bg-white/10 px-6 py-2 backdrop-blur-sm">
-          <span className="text-lg font-semibold tracking-[0.2em]">
-            SELFIE STAR
-          </span>
-        </div>
+        <img src="/image.png" alt="SelfiStar" className="h-16 w-auto" />
 
         {/* Welcome text */}
         <p className="text-sm md:text-base text-white/80 uppercase tracking-[0.15em]">
