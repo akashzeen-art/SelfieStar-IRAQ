@@ -16,7 +16,7 @@ export default function Index() {
       <nav className="fixed top-0 z-50 w-full border-b border-border/40 bg-transparent backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
-            <img src="/image.png" alt="SelfiStar" className="h-10 w-auto" />
+            <img src="/image.png" alt="SelfiStar" className="h-16 w-auto" />
           </div>
           <div className="flex items-center gap-2">
             <LanguageDropdown />

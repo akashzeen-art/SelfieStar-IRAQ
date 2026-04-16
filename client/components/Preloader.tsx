@@ -99,7 +99,7 @@ export default function Preloader({
 
       {/* Centered logo, welcome text and loading bar */}
       <div className="relative z-10 flex flex-col items-center gap-4 px-6 text-center text-white">
-        <img src="/image.png" alt="SelfiStar" className="h-16 w-auto" />
+        <img src="/image.png" alt="SelfiStar" className="h-28 w-auto" />
 
         {/* Welcome text */}
         <p className="text-sm md:text-base text-white/80 uppercase tracking-[0.15em]">

@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="border-t border-border/40 py-8 px-4 sm:px-6 lg:px-8 mt-8">
       <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between text-sm text-muted-foreground">
         <div className="flex items-center gap-2 mb-4 sm:mb-0">
-          <img src="/image.png" alt="SelfiStar" className="h-8 w-auto" />
+          <img src="/image.png" alt="SelfiStar" className="h-12 w-auto" />
         </div>
         <p>{t.index.footer}</p>
       </div>
