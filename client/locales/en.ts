@@ -26,7 +26,7 @@ const en = {
     ctaTitle: "Ready to Become a Star?",
     ctaDesc: "Join thousands of users discovering their selfie potential today.",
     ctaBtn: "Launch Your Journey",
-    footer: "© 2024 SelfiStar. Unleash your selfie potential.",
+    footer: "© 2026 SelfiStar. Unleash your selfie potential.",
   },
   login: {
     welcome: "Welcome back, Star!",
