@@ -116,6 +116,16 @@ export default function Login() {
               <strong>Note:</strong> {t.login.note}
             </div>
 
+            {/* Demo Credentials */}
+            <div
+              onClick={() => { setEmail("user@selfistar.app"); setPassword("User123456"); }}
+              className="rounded-lg border border-white/20 bg-white/5 p-3 text-xs text-muted-foreground cursor-pointer hover:bg-white/10 transition-colors"
+            >
+              <p className="font-semibold text-white/80 mb-1">🎯 Demo Account <span className="text-white/40 font-normal">(click to fill)</span></p>
+              <p>Email: <span className="text-white/70 font-medium">user@selfistar.app</span></p>
+              <p>Password: <span className="text-white/70 font-medium">User123456</span></p>
+            </div>
+
             <Button
               type="submit"
               disabled={isLoading}
