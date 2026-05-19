@@ -9,16 +9,16 @@ import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const COUNTRY_CODES = [
-  { code: "+1",   flag: "🇺🇸", name: "US" },
-  { code: "+44",  flag: "🇬🇧", name: "UK" },
-  { code: "+91",  flag: "🇮🇳", name: "IN" },
-  { code: "+33",  flag: "🇫🇷", name: "FR" },
-  { code: "+966", flag: "🇸🇦", name: "SA" },
-  { code: "+34",  flag: "🇪🇸", name: "ES" },
-  { code: "+971", flag: "🇦🇪", name: "AE" },
-  { code: "+92",  flag: "🇵🇰", name: "PK" },
-  { code: "+880", flag: "🇧🇩", name: "BD" },
-  { code: "+86",  flag: "🇨🇳", name: "CN" },
+  { code: "+1",   flag: "🇺🇸" },
+  { code: "+44",  flag: "🇬🇧" },
+  { code: "+91",  flag: "🇮🇳" },
+  { code: "+33",  flag: "🇫🇷" },
+  { code: "+966", flag: "🇸🇦" },
+  { code: "+34",  flag: "🇪🇸" },
+  { code: "+971", flag: "🇦🇪" },
+  { code: "+92",  flag: "🇵🇰" },
+  { code: "+880", flag: "🇧🇩" },
+  { code: "+86",  flag: "🇨🇳" },
 ];
 
 export default function Login() {
@@ -29,7 +29,6 @@ export default function Login() {
 
   const [countryCode, setCountryCode] = useState("+91");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showInactivePopup, setShowInactivePopup] = useState(false);
 
@@ -49,15 +48,15 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    if (!phone || !password) {
-      setError("Please fill in all fields");
+    if (!phone) {
+      setError("Please enter your mobile number");
       return;
     }
 
     const fullPhone = `${countryCode}${phone.trim()}`;
 
     try {
-      await login(fullPhone, password, true); // true = phone login
+      await login(fullPhone, "", true);
     } catch (err: any) {
       const msg = err instanceof Error ? err.message : "Login failed.";
       if (msg.toLowerCase().includes("not active") || msg.toLowerCase().includes("blocked")) {
@@ -80,12 +79,9 @@ export default function Login() {
             <div className="text-5xl mb-4">🚫</div>
             <h2 className="text-xl font-bold text-white mb-2">Account Inactive</h2>
             <p className="text-muted-foreground text-sm mb-6">
-              Your account is not active. Please contact support to reactivate your account.
+              You are a non active user. Please contact support to reactivate your account.
             </p>
-            <Button
-              onClick={() => setShowInactivePopup(false)}
-              className="w-full bg-white text-black hover:bg-white/90"
-            >
+            <Button onClick={() => setShowInactivePopup(false)} className="w-full bg-white text-black hover:bg-white/90">
               OK
             </Button>
           </div>
@@ -109,7 +105,7 @@ export default function Login() {
                 </div>
               )}
 
-              {/* Phone Number */}
+              {/* Mobile Number */}
               <div>
                 <label className="text-sm font-medium mb-2 block">Mobile Number</label>
                 <div className="flex gap-2">
@@ -132,32 +128,18 @@ export default function Login() {
                     disabled={isLoading}
                     className="bg-input border-border/40 focus:border-neon-purple/60 flex-1"
                     maxLength={15}
+                    autoFocus
                   />
                 </div>
               </div>
 
-              {/* Password */}
-              <div>
-                <label className="text-sm font-medium mb-2 block">{t.login.password}</label>
-                <Input
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
-                  className="bg-input border-border/40 focus:border-neon-purple/60"
-                />
-              </div>
-
-              {/* Demo credentials */}
+              {/* Demo */}
               <div
-                onClick={() => { setCountryCode("+91"); setPhone("9876543210"); setPassword("User123456"); }}
+                onClick={() => { setCountryCode("+91"); setPhone("9876543210"); }}
                 className="rounded-lg border border-white/20 bg-white/5 p-3 text-xs text-muted-foreground cursor-pointer hover:bg-white/10 transition-colors"
               >
                 <p className="font-semibold text-white/80 mb-1">🎯 Demo Account <span className="text-white/40 font-normal">(click to fill)</span></p>
                 <p>Mobile: <span className="text-white/70 font-medium">+91 9876543210</span></p>
-                <p>Password: <span className="text-white/70 font-medium">User123456</span></p>
               </div>
 
               <Button
@@ -166,21 +148,12 @@ export default function Login() {
                 className="w-full bg-white text-black hover:bg-white/90 border border-white/30 py-2 text-base disabled:opacity-50"
               >
                 {isLoading ? (
-                  <><Loader className="mr-2 h-4 w-4 animate-spin" />{t.login.signingIn}</>
+                  <><Loader className="mr-2 h-4 w-4 animate-spin" />Logging in...</>
                 ) : (
-                  t.login.signIn
+                  "Login"
                 )}
               </Button>
             </form>
-
-            <div className="mt-6 pt-6 border-t border-border/40 text-center">
-              <p className="text-muted-foreground text-sm">
-                {t.login.noAccount}{" "}
-                <Link to="/register" className="text-neon-purple hover:text-neon-purple/80 font-medium">
-                  {t.login.createAccount}
-                </Link>
-              </p>
-            </div>
           </div>
 
           <div className="text-center mt-6">

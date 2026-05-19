@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const payload = isPhone
-        ? { phone: identifier, password }
+        ? { phone: identifier }
         : { email: identifier, password };
       const response = await apiClient.post<AuthResponse>("/auth/login", payload);
       tokenStorage.set(response.data.token);

@@ -22,7 +22,7 @@ export default function Index() {
             <LanguageDropdown />
             <Link to="/login">
               <Button className="bg-white text-black hover:bg-white/90 border border-white/30 text-sm px-5">
-                {t.nav.login} / {t.nav.signup}
+                Login
               </Button>
             </Link>
           </div>
@@ -36,15 +36,10 @@ export default function Index() {
             {t.index.hero}
           </h1>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link to="/register">
+            <Link to="/login">
               <Button className="bg-white text-black hover:bg-white/90 border border-white/30 px-8 py-6 text-lg">
                 <Camera className="mr-2 h-5 w-5" />
                 {t.index.getStarted}
-              </Button>
-            </Link>
-            <Link to="/login">
-              <Button variant="outline" className="border-white/30 px-8 py-6 text-lg hover:bg-white/10 text-white">
-                {t.index.alreadyStar}
               </Button>
             </Link>
           </div>
@@ -118,7 +113,7 @@ export default function Index() {
         <div className="mx-auto max-w-4xl text-center p-12 rounded-2xl border border-white/20 bg-transparent backdrop-blur-sm">
           <h2 className="text-4xl font-bold mb-4">{t.index.ctaTitle}</h2>
           <p className="text-xl text-muted-foreground mb-8">{t.index.ctaDesc}</p>
-          <Link to="/register">
+          <Link to="/login">
             <Button className="bg-white text-black hover:bg-white/90 border border-white/30 px-8 py-6 text-lg">
               <Star className="mr-2 h-5 w-5" />
               {t.index.ctaBtn}

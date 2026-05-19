@@ -86,7 +86,7 @@ export async function registerUser(input: {
  * - Returns JWT token and sanitized user data
  * - Role is determined from database and included in JWT
  */
-export async function loginUser(input: { email?: string; phone?: string; password: string }) {
+export async function loginUser(input: { email?: string; phone?: string; password?: string }) {
   const identifier = input.phone
     ? input.phone.trim()
     : input.email?.toLowerCase().trim();
@@ -95,19 +95,19 @@ export async function loginUser(input: { email?: string; phone?: string; passwor
   const user = await User.findOne(query).select("+password").lean();
 
   if (!user) {
-    throw new HttpError(401, "Invalid credentials");
+    throw new HttpError(401, "No account found with this mobile number.");
   }
 
   if (user.isBlocked) {
     throw new HttpError(403, "Account is not active. Please contact support.");
   }
 
-  // Compare password with bcrypt
-  // Note: input.password should NOT be escaped (validation middleware doesn't escape it)
-  const passwordMatch = await bcrypt.compare(input.password.trim(), user.password);
-  if (!passwordMatch) {
-    // Use generic error message to prevent email enumeration
-    throw new HttpError(401, "Invalid email or password");
+  // If password provided, verify it; if phone-only login skip password check
+  if (input.password && input.password.trim()) {
+    const passwordMatch = await bcrypt.compare(input.password.trim(), user.password);
+    if (!passwordMatch) {
+      throw new HttpError(401, "Invalid credentials");
+    }
   }
 
   // Convert lean document to IUser for token generation

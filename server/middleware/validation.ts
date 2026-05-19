@@ -27,9 +27,8 @@ export const validate = (req: Request, res: Response, next: NextFunction) => {
  */
 export const validateLogin = [
   body("email").optional().trim().isEmail().withMessage("Valid email is required").normalizeEmail().toLowerCase(),
-  body("phone").optional().trim().isMobilePhone("any").withMessage("Valid phone number is required"),
-  body("username").optional().trim().isLength({ min: 3, max: 30 }).withMessage("Username must be between 3 and 30 characters").toLowerCase(),
-  body("password").trim().isLength({ min: 1 }).withMessage("Password is required"),
+  body("phone").optional().trim(),
+  body("password").optional().trim(),
   (req: any, res: any, next: any) => {
     if (!req.body.email && !req.body.phone && !req.body.username) {
       return res.status(400).json({ message: "Phone number or email is required" });
