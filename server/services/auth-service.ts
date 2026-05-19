@@ -130,7 +130,7 @@ function issueAuthToken(user: IUser) {
   const payload: AuthTokenPayload = {
     sub: user._id.toString(),
     role: user.role,
-    email: user.email,
+    email: user.email || "",
   };
 
   // Token expires in 7 days (good balance for user experience and security)
