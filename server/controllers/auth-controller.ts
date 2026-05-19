@@ -16,12 +16,12 @@ export const registerController: RequestHandler = asyncHandler(async (req, res) 
   // Input is already validated by express-validator middleware
   // express-validator normalizes and sanitizes the input
   const input = {
-    email: req.body.email, // Already normalized by express-validator
-    username: req.body.username, // Already sanitized by express-validator
-    password: req.body.password, // Already sanitized by express-validator
+    email: req.body.email,
+    phone: req.body.phone,
+    username: req.body.username,
+    password: req.body.password,
   };
 
-  // Register user and get JWT token
   const result = await registerUser(input);
 
   // Return 201 Created with token and user data
@@ -41,12 +41,12 @@ export const loginController: RequestHandler = asyncHandler(async (req, res) => 
   // Input is already validated by express-validator middleware
   // express-validator normalizes and sanitizes the input
   const input = {
-    email: req.body.email, // Optional - already normalized by express-validator
-    username: req.body.username, // Optional - already sanitized by express-validator
-    password: req.body.password, // Already sanitized by express-validator
+    email: req.body.email,
+    phone: req.body.phone,
+    username: req.body.username,
+    password: req.body.password,
   };
 
-  // Login user and get JWT token
   const result = await loginUser(input);
 
   // Return 200 OK with token and user data

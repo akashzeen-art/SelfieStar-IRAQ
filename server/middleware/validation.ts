@@ -26,59 +26,30 @@ export const validate = (req: Request, res: Response, next: NextFunction) => {
  * Auth Validation
  */
 export const validateLogin = [
-  body("email")
-    .optional()
-    .trim()
-    .isEmail()
-    .withMessage("Valid email is required")
-    .normalizeEmail()
-    .toLowerCase(),
-  body("username")
-    .optional()
-    .trim()
-    .isLength({ min: 3, max: 30 })
-    .withMessage("Username must be between 3 and 30 characters")
-    .toLowerCase(),
-  body("password")
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage("Password is required"),
-    // Custom validation: require either email or username
+  body("email").optional().trim().isEmail().withMessage("Valid email is required").normalizeEmail().toLowerCase(),
+  body("phone").optional().trim().isMobilePhone("any").withMessage("Valid phone number is required"),
+  body("username").optional().trim().isLength({ min: 3, max: 30 }).withMessage("Username must be between 3 and 30 characters").toLowerCase(),
+  body("password").trim().isLength({ min: 1 }).withMessage("Password is required"),
   (req: any, res: any, next: any) => {
-    if (!req.body.email && !req.body.username) {
-      return res.status(400).json({ message: "Either email or username is required" });
+    if (!req.body.email && !req.body.phone && !req.body.username) {
+      return res.status(400).json({ message: "Phone number or email is required" });
     }
     next();
   },
-  // Note: Password should NOT be escaped - it needs to match the stored hash
   validate,
 ];
 
 export const validateRegister = [
-  body("email")
-    .trim()
-    .isEmail()
-    .withMessage("Valid email is required")
-    .normalizeEmail()
-    .toLowerCase(),
-  body("username")
-    .trim()
-    .isLength({ min: 3, max: 30 })
-    .withMessage("Username must be between 3 and 30 characters")
-    .matches(/^[a-zA-Z0-9_]+$/)
-    .withMessage("Username can only contain letters, numbers, and underscores")
-    .escape(), // XSS prevention
-  body("password")
-    .trim()
-    .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters")
-    .matches(/[A-Z]/)
-    .withMessage("Password must contain at least one uppercase letter")
-    .matches(/[a-z]/)
-    .withMessage("Password must contain at least one lowercase letter")
-    .matches(/\d/)
-    .withMessage("Password must contain at least one number"),
-    // Note: Password should NOT be escaped - it needs to be hashed as-is
+  body("email").optional().trim().isEmail().withMessage("Valid email is required").normalizeEmail().toLowerCase(),
+  body("phone").optional().trim().isMobilePhone("any").withMessage("Valid phone number is required"),
+  body("username").trim().isLength({ min: 3, max: 30 }).withMessage("Username must be between 3 and 30 characters").matches(/^[a-zA-Z0-9_]+$/).withMessage("Username can only contain letters, numbers, and underscores").escape(),
+  body("password").trim().isLength({ min: 8 }).withMessage("Password must be at least 8 characters").matches(/[A-Z]/).withMessage("Password must contain at least one uppercase letter").matches(/[a-z]/).withMessage("Password must contain at least one lowercase letter").matches(/\d/).withMessage("Password must contain at least one number"),
+  (req: any, res: any, next: any) => {
+    if (!req.body.email && !req.body.phone) {
+      return res.status(400).json({ message: "Phone number or email is required" });
+    }
+    next();
+  },
   validate,
 ];
 

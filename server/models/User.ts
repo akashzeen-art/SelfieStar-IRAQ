@@ -10,6 +10,7 @@ export interface IUser extends Document {
   username: string; // Unique username for display
   name: string; // Full name
   email: string;
+  phone?: string;
   password: string; // Hashed password (use bcrypt before saving)
   role: "user";
   profileImage?: string; // Profile image URL
@@ -65,12 +66,20 @@ const UserSchema = new Schema<IUser>(
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: false,
       unique: true,
+      sparse: true,
       lowercase: true,
       trim: true,
       match: [/^\S+@\S+\.\S+$/, "Please provide a valid email address"],
-      index: true, // Unique index for login lookups
+      index: true,
+    },
+    phone: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+      index: true,
     },
     password: {
       type: String,

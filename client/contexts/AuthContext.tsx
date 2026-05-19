@@ -6,9 +6,9 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string, isPhone?: boolean) => Promise<void>;
   adminLogin: (email: string, password: string) => Promise<void>;
-  register: (email: string, username: string, password: string) => Promise<void>;
+  register: (phone: string, username: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -32,17 +32,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (identifier: string, password: string, isPhone = false) => {
     setIsLoading(true);
     try {
-      const response = await apiClient.post<AuthResponse>("/auth/login", {
-        email,
-        password,
-      });
+      const payload = isPhone
+        ? { phone: identifier, password }
+        : { email: identifier, password };
+      const response = await apiClient.post<AuthResponse>("/auth/login", payload);
       tokenStorage.set(response.data.token);
       setUser(response.data.user);
     } catch (error: any) {
-      // Extract error message from response
       const errorMessage = error.response?.data?.message || error.message || "Login failed";
       throw new Error(errorMessage);
     } finally {
@@ -50,18 +49,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const register = async (email: string, username: string, password: string) => {
+  const register = async (phone: string, username: string, password: string) => {
     setIsLoading(true);
     try {
       const response = await apiClient.post<AuthResponse>("/auth/register", {
-        email,
+        phone,
         username,
         password,
       });
       tokenStorage.set(response.data.token);
       setUser(response.data.user);
     } catch (error: any) {
-      // Extract error message from response
       const errorMessage = error.response?.data?.message || error.message || "Registration failed";
       throw new Error(errorMessage);
     } finally {

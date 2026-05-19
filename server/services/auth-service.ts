@@ -24,43 +24,38 @@ type AuthTokenPayload = {
  * - Returns JWT token and sanitized user data
  */
 export async function registerUser(input: {
-  email: string;
+  email?: string;
+  phone?: string;
   username: string;
   password: string;
   name?: string;
 }) {
-  const email = input.email.toLowerCase().trim();
+  const email = input.email?.toLowerCase().trim();
+  const phone = input.phone?.trim();
   const username = input.username.toLowerCase().trim();
   const name = input.name?.trim() || username;
 
-  // Check if email already exists (optimized query with index)
-  const existingEmail = await User.findOne({ email }).select("_id").lean();
-  if (existingEmail) {
-    throw new HttpError(409, "Email already registered");
+  if (email) {
+    const existingEmail = await User.findOne({ email }).select("_id").lean();
+    if (existingEmail) throw new HttpError(409, "Email already registered");
   }
 
-  // Check if username already exists
+  if (phone) {
+    const existingPhone = await User.findOne({ phone }).select("_id").lean();
+    if (existingPhone) throw new HttpError(409, "Phone number already registered");
+  }
+
   const existingUsername = await User.findOne({ username }).select("_id").lean();
-  if (existingUsername) {
-    throw new HttpError(409, "Username already taken");
-  }
+  if (existingUsername) throw new HttpError(409, "Username already taken");
 
-  // Password is hashed automatically by pre-save hook
-  // Create new user
   const user = new User({
-    username,
-    name,
-    email,
-    password: input.password, // Will be hashed by pre-save hook
+    username, name,
+    email: email || undefined,
+    phone: phone || undefined,
+    password: input.password,
     role: "user",
-    totalSelfies: 0,
-    totalVideos: 0,
-    totalScore: 0,
-    challengeWins: 0,
-    badges: [],
-    isBlocked: false,
-    isVerified: false,
-    failedLoginAttempts: 0,
+    totalSelfies: 0, totalVideos: 0, totalScore: 0,
+    challengeWins: 0, badges: [], isBlocked: false, isVerified: false, failedLoginAttempts: 0,
   });
 
   try {
@@ -91,20 +86,20 @@ export async function registerUser(input: {
  * - Returns JWT token and sanitized user data
  * - Role is determined from database and included in JWT
  */
-export async function loginUser(input: { email: string; password: string }) {
-  const email = input.email.toLowerCase().trim();
+export async function loginUser(input: { email?: string; phone?: string; password: string }) {
+  const identifier = input.phone
+    ? input.phone.trim()
+    : input.email?.toLowerCase().trim();
 
-  // Find user with password field (needed for comparison)
-  // Using select('+password') to include password field
-  const user = await User.findOne({ email }).select("+password").lean();
-  
+  const query = input.phone ? { phone: identifier } : { email: identifier };
+  const user = await User.findOne(query).select("+password").lean();
+
   if (!user) {
-    // Use generic error message to prevent email enumeration
-    throw new HttpError(401, "Invalid email or password");
+    throw new HttpError(401, "Invalid credentials");
   }
 
   if (user.isBlocked) {
-    throw new HttpError(403, "Account is blocked. Please contact support.");
+    throw new HttpError(403, "Account is not active. Please contact support.");
   }
 
   // Compare password with bcrypt
