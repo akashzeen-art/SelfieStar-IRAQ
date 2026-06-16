@@ -29,11 +29,17 @@ function expressPlugin(): Plugin {
   return {
     name: "express-plugin",
     apply: "serve", // Only apply during development (serve mode)
-    configureServer(server) {
-      // Dynamic import so "vite build" never loads server (fixes Railway/build)
-      import("./server/index.ts").then(({ createServer }) => {
-        const app = createServer();
-        server.middlewares.use(app);
+    async configureServer(server) {
+      // Await before Vite installs SPA fallback middleware; .then() mounted API too late (404 on /api/*)
+      const { createServer } = await import("./server/index.ts");
+      const app = createServer();
+      server.middlewares.use((req, res, next) => {
+        const path = (req.url ?? "").split("?")[0];
+        if (path.startsWith("/api")) {
+          app(req, res, next);
+          return;
+        }
+        next();
       });
     },
   };
