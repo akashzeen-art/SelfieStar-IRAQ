@@ -70,7 +70,7 @@ Set at minimum:
 | Variable | Production value |
 |----------|------------------|
 | `NODE_ENV` | `production` |
-| `PORT` | `8080` |
+| `PORT` | `3001` (8080 is used by another app on this server) |
 | `FRONTEND_URL` | `https://aiselfiesuperstar.com` |
 | `CORS_ORIGIN` | `https://aiselfiesuperstar.com,https://www.aiselfiesuperstar.com` |
 | `MONGODB_URI` | Your MongoDB Atlas URI |
@@ -104,8 +104,8 @@ pm2 startup   # follow the printed command so PM2 survives reboots
 Verify locally on the server:
 
 ```bash
-curl http://127.0.0.1:8080/api/health
-curl http://127.0.0.1:8080/api/ping
+curl http://127.0.0.1:3001/api/health
+curl http://127.0.0.1:3001/api/ping
 ```
 
 ---
@@ -157,7 +157,7 @@ bash scripts/deploy-vps.sh
 
 | Issue | Fix |
 |-------|-----|
-| Port 8080 in use | Change `PORT` in `.env` and `ecosystem.config.cjs`, update nginx upstream |
+| Port 3001 in use | Change `PORT` in `.env` and `ecosystem.config.cjs`, update nginx upstream |
 | `sharp` install errors | Run `pnpm approve-builds` and allow `sharp`, then `pnpm install` |
 | 502 Bad Gateway | `pm2 logs selfistar` — app may have crashed or wrong port |
 | CORS errors | `CORS_ORIGIN` must match your public URL exactly |
