@@ -9,6 +9,10 @@ export const env = {
   jwtSecret: envValue("JWT_SECRET", "dev-jwt-secret-change-me"),
   signedUrlSecret: envValue("SIGNED_URL_SECRET", "dev-signed-secret-change-me"),
   corsOrigin: envValue("CORS_ORIGIN", "*"),
+  corsOrigins: envValue("CORS_ORIGIN", "*")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean),
   encryptionKeyHex: envValue("SELFIE_ENCRYPTION_KEY", randomBytes(32).toString("hex")),
   selfieTokenTtlSec: Number(envValue("SELFIE_TOKEN_TTL_SEC", "300")),
   mongoUri: envValue("MONGODB_URI", "mongodb://localhost:27017/selfistar"),

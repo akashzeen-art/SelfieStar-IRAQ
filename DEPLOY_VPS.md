@@ -6,7 +6,7 @@ Full-stack deployment (React SPA + Express API) on your own server, e.g.:
 root@content:/var/www/vasnumero/selfistar#
 ```
 
-Production URL in this guide: **https://click.selfiestar.fun** (update if your domain differs).
+Production URL: **https://aiselfiesuperstar.com** (and **https://www.aiselfiesuperstar.com**).
 
 ---
 
@@ -71,8 +71,8 @@ Set at minimum:
 |----------|------------------|
 | `NODE_ENV` | `production` |
 | `PORT` | `8080` |
-| `FRONTEND_URL` | `https://click.selfiestar.fun` |
-| `CORS_ORIGIN` | `https://click.selfiestar.fun` |
+| `FRONTEND_URL` | `https://aiselfiesuperstar.com` |
+| `CORS_ORIGIN` | `https://aiselfiesuperstar.com,https://www.aiselfiesuperstar.com` |
 | `MONGODB_URI` | Your MongoDB Atlas URI |
 | `JWT_SECRET` | Long random string (`openssl rand -hex 32`) |
 | `SIGNED_URL_SECRET` | Long random string |
@@ -128,7 +128,7 @@ Edit `server_name` in the nginx file if your domain is different.
 
 ```bash
 apt-get install -y certbot python3-certbot-nginx
-certbot --nginx -d click.selfiestar.fun
+certbot --nginx -d aiselfiesuperstar.com -d www.aiselfiesuperstar.com
 ```
 
 Certbot updates nginx for SSL and auto-renewal.

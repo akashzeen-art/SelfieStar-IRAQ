@@ -48,10 +48,15 @@ export function applySecurityMiddleware(app: Express) {
 
   app.use(helmet(helmetOptions));
 
-  // CORS - Configure allowed origins
+  // CORS - Configure allowed origins (comma-separated for multiple domains)
   app.use(
     cors({
-      origin: env.corsOrigin === "*" ? true : env.corsOrigin,
+      origin:
+        env.corsOrigin === "*"
+          ? true
+          : env.corsOrigins.length === 1
+            ? env.corsOrigins[0]
+            : env.corsOrigins,
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
