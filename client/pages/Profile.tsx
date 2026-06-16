@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   User, Edit2, Save, X, Camera, Star, Trophy, TrendingUp, Award, Calendar,
-  Mail, Shield, Trash2, Upload, Image as ImageIcon
+  Mail, Shield, Trash2, Upload, Image as ImageIcon, Smartphone, CreditCard, Loader2
 } from "lucide-react";
 import { apiClient } from "@/lib/axios";
+import { SubscriptionAccount, UnsubscribeResponse } from "@shared/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSelfies } from "@/contexts/SelfieContext";
 import { useToast } from "@/hooks/use-toast";
@@ -43,6 +44,9 @@ export default function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [formData, setFormData] = useState({ username: "", name: "", profileImage: "" });
+  const [subscription, setSubscription] = useState<SubscriptionAccount | null>(null);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
+  const [unsubscribing, setUnsubscribing] = useState(false);
 
   useEffect(() => {
     if (!authUser) { navigate("/login"); return; }
@@ -60,10 +64,64 @@ export default function Profile() {
       setStats(statsRes.data.stats);
       setFormData({ username: profileRes.data.user.username || "", name: profileRes.data.user.username || "", profileImage: profileRes.data.user.profileImage || "" });
       await refreshMine();
+      await loadSubscription();
     } catch (error: any) {
       toast({ title: "Error", description: error.response?.data?.message || "Failed to load profile", variant: "destructive" });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadSubscription = async () => {
+    try {
+      setSubscriptionLoading(true);
+      const response = await apiClient.get<SubscriptionAccount>("/subscription/my-account");
+      setSubscription(response.data);
+    } catch (error: any) {
+      setSubscription(null);
+      toast({
+        title: "Subscription",
+        description: error.response?.data?.message || "Failed to load account details",
+        variant: "destructive",
+      });
+    } finally {
+      setSubscriptionLoading(false);
+    }
+  };
+
+  const handleSubscribe = () => {
+    if (subscription?.redirectUrl) {
+      window.location.href = subscription.redirectUrl;
+    }
+  };
+
+  const handleUnsubscribe = async () => {
+    if (!confirm("Are you sure you want to unsubscribe from this service?")) return;
+    try {
+      setUnsubscribing(true);
+      const response = await apiClient.post<UnsubscribeResponse>("/subscription/unsubscribe");
+      if (response.data.status === 1) {
+        logout();
+        if (response.data.redirectUrl) {
+          window.location.href = response.data.redirectUrl;
+        } else {
+          navigate("/login");
+        }
+        return;
+      }
+      toast({
+        title: "Unsubscription failed",
+        description: "Unsubscription request failed. Please try again",
+        variant: "destructive",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Unsubscription failed",
+        description: error.response?.data?.message || "Unsubscription request failed. Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setUnsubscribing(false);
     }
   };
 
@@ -219,6 +277,84 @@ export default function Profile() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* My Account / Subscription */}
+        <div className="rounded-xl border border-border/40 bg-transparent backdrop-blur-sm p-6 md:p-8">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Smartphone className="h-5 w-5 text-neon-cyan" />
+            My Account
+          </h2>
+
+          {subscriptionLoading ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading subscription details...
+            </div>
+          ) : subscription ? (
+            <div className="space-y-4">
+              {subscription.status === 1 ? (
+                <>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="rounded-lg border border-border/40 p-4">
+                      <p className="text-xs text-muted-foreground mb-1">Mobile Number</p>
+                      <p className="font-medium">{subscription.msisdn}</p>
+                    </div>
+                    <div className="rounded-lg border border-border/40 p-4">
+                      <p className="text-xs text-muted-foreground mb-1">Service</p>
+                      <p className="font-medium">{subscription.service_name || "SelfiStar"}</p>
+                    </div>
+                    <div className="rounded-lg border border-border/40 p-4">
+                      <p className="text-xs text-muted-foreground mb-1">Valid From</p>
+                      <p className="font-medium">{subscription.valid_from || "—"}</p>
+                    </div>
+                    <div className="rounded-lg border border-border/40 p-4">
+                      <p className="text-xs text-muted-foreground mb-1">Valid To</p>
+                      <p className="font-medium">{subscription.valid_to || "—"}</p>
+                    </div>
+                    <div className="rounded-lg border border-border/40 p-4 sm:col-span-2">
+                      <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                        <CreditCard className="h-3 w-3" /> Price
+                      </p>
+                      <p className="font-medium">{subscription.pricePoint || "—"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="px-3 py-1 text-xs font-medium bg-green-500/20 text-green-400 rounded-full">
+                      Active Subscription
+                    </span>
+                    <Button
+                      variant="outline"
+                      onClick={handleUnsubscribe}
+                      disabled={unsubscribing}
+                      className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                    >
+                      {unsubscribing ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Processing...</>
+                      ) : (
+                        "UnSubscribe"
+                      )}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-muted-foreground text-sm">
+                    You do not have an active subscription. Subscribe to access all features.
+                  </p>
+                  <Button
+                    onClick={handleSubscribe}
+                    disabled={!subscription.redirectUrl}
+                    className="bg-gradient-to-r from-neon-purple to-neon-pink hover:from-neon-purple/90 hover:to-neon-pink/90 text-white"
+                  >
+                    Subscribe
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Unable to load subscription details.</p>
+          )}
         </div>
 
         {/* Stats Grid */}

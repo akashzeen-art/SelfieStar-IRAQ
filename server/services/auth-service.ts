@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { env } from "../config/env";
 import { User, IUser } from "../models/User";
 import { HttpError } from "../utils/http";
+import { checkSubscriptionStatus } from "../services/mselfistar-service";
 
 /**
  * Authentication Service
@@ -90,6 +91,17 @@ export async function loginUser(input: { email?: string; phone?: string; passwor
   const identifier = input.phone
     ? input.phone.trim()
     : input.email?.toLowerCase().trim();
+
+  // Phone login: verify subscription with mselfistar before allowing portal access
+  if (input.phone) {
+    const result = await checkSubscriptionStatus(input.phone.trim());
+    if (!result.subscribed) {
+      throw new HttpError(403, "Subscription required to access the portal", {
+        status: 0,
+        redirectUrl: "redirectUrl" in result ? result.redirectUrl : undefined,
+      });
+    }
+  }
 
   const query = input.phone ? { phone: identifier } : { email: identifier };
   const user = await User.findOne(query).select("+password").lean();
@@ -192,6 +204,7 @@ export function sanitizeUser(user: IUser | { _id: any; username?: string; name: 
     username: "username" in user && user.username ? user.username : user.name, // Use username if available, fallback to name
     name: user.name,
     email: user.email,
+    phone: "phone" in user ? user.phone : undefined,
     role: user.role,
     profileImage: "profileImage" in user ? user.profileImage : undefined,
     totalSelfies: "totalSelfies" in user ? user.totalSelfies || 0 : 0,

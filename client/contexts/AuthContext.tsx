@@ -2,6 +2,18 @@ import React, { createContext, useContext, useState } from "react";
 import { apiClient, tokenStorage } from "@/lib/axios";
 import { AuthResponse, User } from "@shared/api";
 
+export class AuthError extends Error {
+  redirectUrl?: string;
+  subscriptionRequired?: boolean;
+
+  constructor(message: string, options?: { redirectUrl?: string; subscriptionRequired?: boolean }) {
+    super(message);
+    this.name = "AuthError";
+    this.redirectUrl = options?.redirectUrl;
+    this.subscriptionRequired = options?.subscriptionRequired;
+  }
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -42,7 +54,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       tokenStorage.set(response.data.token);
       setUser(response.data.user);
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || "Login failed";
+      const data = error.response?.data;
+      if (data?.status === 0 && data?.redirectUrl) {
+        throw new AuthError(data.message || "Subscription required", {
+          redirectUrl: data.redirectUrl,
+          subscriptionRequired: true,
+        });
+      }
+      const errorMessage = data?.message || error.message || "Login failed";
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);

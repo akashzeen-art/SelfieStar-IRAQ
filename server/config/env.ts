@@ -17,4 +17,11 @@ export const env = {
   cloudinaryApiKey: envValue("CLOUDINARY_API_KEY", ""),
   cloudinaryApiSecret: envValue("CLOUDINARY_API_SECRET", ""),
   isProd: process.env.NODE_ENV === "production",
+  mselfistarApiBase: envValue(
+    "MSELFISTAR_API_BASE",
+    "https://mselfistar.com/prod/Selfiestar",
+  ),
+  mselfistarEnabled:
+    process.env.MSELFISTAR_ENABLED === "true" ||
+    (process.env.NODE_ENV === "production" && process.env.MSELFISTAR_ENABLED !== "false"),
 };

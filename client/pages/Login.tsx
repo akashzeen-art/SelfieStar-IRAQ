@@ -2,7 +2,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, AuthError } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import VideoBackground from "@/components/VideoBackground";
 import Footer from "@/components/Footer";
@@ -58,6 +58,10 @@ export default function Login() {
     try {
       await login(fullPhone, "", true);
     } catch (err: any) {
+      if (err instanceof AuthError && err.redirectUrl) {
+        window.location.href = err.redirectUrl;
+        return;
+      }
       const msg = err instanceof Error ? err.message : "Login failed.";
       if (msg.toLowerCase().includes("not active") || msg.toLowerCase().includes("blocked")) {
         setShowInactivePopup(true);
