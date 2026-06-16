@@ -110,38 +110,46 @@ curl http://127.0.0.1:3001/api/ping
 
 ---
 
-## 5. Nginx reverse proxy
+## 5. Nginx reverse proxy (HTTP + HTTPS)
+
+**Important:** On this VPS, port **8080** runs another app (AiGameopedia). SelfiStar uses **3001**.
 
 ```bash
 cd /var/www/vasnumero/selfistar
-cp deploy/nginx-selfistar.conf /etc/nginx/sites-available/selfistar
-ln -sf /etc/nginx/sites-available/selfistar /etc/nginx/sites-enabled/
-nginx -t
-systemctl reload nginx
+git pull origin main
+
+# Ensure app runs on 3001
+echo 'PORT=3001' >> .env   # or sed -i 's/^PORT=.*/PORT=3001/' .env
+bash scripts/deploy-vps.sh
+
+# Fix nginx (disables conflicting sites, sets HTTPS → port 3001)
+sudo bash scripts/fix-nginx-domain.sh
 ```
 
-Edit `server_name` in the nginx file if your domain is different.
-
----
-
-## 6. HTTPS (Let's Encrypt)
+Or manually:
 
 ```bash
-apt-get install -y certbot python3-certbot-nginx
+cp deploy/nginx-selfistar.conf /etc/nginx/sites-available/selfistar
+ln -sf /etc/nginx/sites-available/selfistar /etc/nginx/sites-enabled/selfistar
+rm -f /etc/nginx/sites-enabled/default
+# Remove any other config using aiselfiesuperstar.com (e.g. vasnumero, aigameopedia)
+ls /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
 certbot --nginx -d aiselfiesuperstar.com -d www.aiselfiesuperstar.com
 ```
 
-Certbot updates nginx for SSL and auto-renewal.
+Verify HTTPS serves SelfiStar (not AiGameopedia):
 
----
-
-## 7. MongoDB Atlas
+```bash
+curl -sk https://aiselfiesuperstar.com/api/ping          # {"message":"ping"}
+curl -sk https://aiselfiesuperstar.com/ | grep '<title>' # <title>SelfiStar</title>
+```
 
 In [MongoDB Atlas](https://cloud.mongodb.com) → **Network Access**, add your VPS public IP (or `0.0.0.0/0` temporarily for testing).
 
 ---
 
-## 8. Redeploy after code changes
+## 6. MongoDB Atlas
 
 On the server:
 
