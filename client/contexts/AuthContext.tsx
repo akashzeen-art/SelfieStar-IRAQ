@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(response.data.user);
     } catch (error: any) {
       const data = error.response?.data;
-      if (data?.status === 0 && data?.redirectUrl) {
+      if (data?.redirectUrl && (data?.status === 0 || error.response?.status === 403)) {
         throw new AuthError(data.message || "Subscription required", {
           redirectUrl: data.redirectUrl,
           subscriptionRequired: true,

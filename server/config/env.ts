@@ -21,7 +21,5 @@ export const env = {
     "MSELFISTAR_API_BASE",
     "https://mselfistar.com/prod/Selfiestar",
   ),
-  mselfistarEnabled:
-    process.env.MSELFISTAR_ENABLED === "true" ||
-    (process.env.NODE_ENV === "production" && process.env.MSELFISTAR_ENABLED !== "false"),
+  mselfistarEnabled: process.env.MSELFISTAR_ENABLED !== "false",
 };

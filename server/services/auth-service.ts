@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { randomBytes } from "crypto";
 import { env } from "../config/env";
 import { User, IUser } from "../models/User";
 import { HttpError } from "../utils/http";
@@ -78,6 +79,45 @@ export async function registerUser(input: {
   return issueAuthToken(user);
 }
 
+/** Create a portal user for a subscribed phone number (Iraq activation flow) */
+async function findOrCreatePhoneUser(phone: string) {
+  const trimmed = phone.trim();
+  const existing = await User.findOne({ phone: trimmed });
+  if (existing) return existing;
+
+  const digits = trimmed.replace(/\D/g, "");
+  let username = `iq${digits.slice(-9)}`;
+  let suffix = 0;
+  while (await User.findOne({ username: suffix ? `${username}${suffix}` : username }).select("_id").lean()) {
+    suffix += 1;
+    if (suffix > 99) {
+      username = `iq${digits}`;
+      break;
+    }
+  }
+  if (suffix > 0 && suffix <= 99) username = `${username}${suffix}`;
+
+  const tempPassword = randomBytes(16).toString("hex");
+  const user = new User({
+    username,
+    name: username,
+    phone: trimmed,
+    password: tempPassword,
+    role: "user",
+    totalSelfies: 0,
+    totalVideos: 0,
+    totalScore: 0,
+    challengeWins: 0,
+    badges: [],
+    isBlocked: false,
+    isVerified: true,
+    failedLoginAttempts: 0,
+  });
+
+  await user.save();
+  return user;
+}
+
 /**
  * Login user (supports both users and admins)
  * - Finds user by email (indexed query)
@@ -104,7 +144,12 @@ export async function loginUser(input: { email?: string; phone?: string; passwor
   }
 
   const query = input.phone ? { phone: identifier } : { email: identifier };
-  const user = await User.findOne(query).select("+password").lean();
+  let user = await User.findOne(query).select("+password").lean();
+
+  if (!user && input.phone) {
+    const userDoc = await findOrCreatePhoneUser(input.phone.trim());
+    user = await User.findById(userDoc._id).select("+password").lean();
+  }
 
   if (!user) {
     throw new HttpError(401, "No account found with this mobile number.");

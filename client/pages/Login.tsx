@@ -18,6 +18,7 @@ export default function Login() {
 
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
+  const [redirecting, setRedirecting] = useState(false);
   const [showInactivePopup, setShowInactivePopup] = useState(false);
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function Login() {
       await login(fullPhone, "", true);
     } catch (err: any) {
       if (err instanceof AuthError && err.redirectUrl) {
+        setRedirecting(true);
         window.location.href = err.redirectUrl;
         return;
       }
@@ -119,10 +121,12 @@ export default function Login() {
 
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || redirecting}
                 className="w-full bg-white text-black hover:bg-white/90 border border-white/30 py-2 text-base disabled:opacity-50"
               >
-                {isLoading ? (
+                {redirecting ? (
+                  <><Loader className="mr-2 h-4 w-4 animate-spin" />Redirecting to subscribe...</>
+                ) : isLoading ? (
                   <><Loader className="mr-2 h-4 w-4 animate-spin" />Logging in...</>
                 ) : (
                   "Login"
