@@ -8,18 +8,7 @@ import VideoBackground from "@/components/VideoBackground";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const COUNTRY_CODES = [
-  { code: "+1",   flag: "🇺🇸" },
-  { code: "+44",  flag: "🇬🇧" },
-  { code: "+91",  flag: "🇮🇳" },
-  { code: "+33",  flag: "🇫🇷" },
-  { code: "+966", flag: "🇸🇦" },
-  { code: "+34",  flag: "🇪🇸" },
-  { code: "+971", flag: "🇦🇪" },
-  { code: "+92",  flag: "🇵🇰" },
-  { code: "+880", flag: "🇧🇩" },
-  { code: "+86",  flag: "🇨🇳" },
-];
+const IRAQ_COUNTRY_CODE = "+964";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -27,7 +16,6 @@ export default function Login() {
   const { login, isLoading, user, isAuthenticated } = useAuth();
   const { t } = useLanguage();
 
-  const [countryCode, setCountryCode] = useState("+91");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [showInactivePopup, setShowInactivePopup] = useState(false);
@@ -53,7 +41,7 @@ export default function Login() {
       return;
     }
 
-    const fullPhone = `${countryCode}${phone.trim()}`;
+    const fullPhone = `${IRAQ_COUNTRY_CODE}${phone.trim()}`;
 
     try {
       await login(fullPhone, "", true);
@@ -113,20 +101,12 @@ export default function Login() {
               <div>
                 <label className="text-sm font-medium mb-2 block">Mobile Number</label>
                 <div className="flex gap-2">
-                  <select
-                    value={countryCode}
-                    onChange={(e) => setCountryCode(e.target.value)}
-                    className="h-10 rounded-md border border-border/40 bg-input px-2 text-sm text-white focus:outline-none focus:border-neon-purple/60 w-24"
-                  >
-                    {COUNTRY_CODES.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.flag} {c.code}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="h-10 flex items-center justify-center rounded-md border border-border/40 bg-input px-3 text-sm text-white shrink-0">
+                    🇮🇶 +964
+                  </div>
                   <Input
                     type="tel"
-                    placeholder="9876543210"
+                    placeholder="7901234567"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                     disabled={isLoading}
@@ -135,15 +115,6 @@ export default function Login() {
                     autoFocus
                   />
                 </div>
-              </div>
-
-              {/* Demo */}
-              <div
-                onClick={() => { setCountryCode("+91"); setPhone("9876543210"); }}
-                className="rounded-lg border border-white/20 bg-white/5 p-3 text-xs text-muted-foreground cursor-pointer hover:bg-white/10 transition-colors"
-              >
-                <p className="font-semibold text-white/80 mb-1">🎯 Demo Account <span className="text-white/40 font-normal">(click to fill)</span></p>
-                <p>Mobile: <span className="text-white/70 font-medium">+91 9876543210</span></p>
               </div>
 
               <Button

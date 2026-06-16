@@ -8,25 +8,13 @@ import VideoBackground from "@/components/VideoBackground";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const COUNTRY_CODES = [
-  { code: "+1",   flag: "🇺🇸", name: "US" },
-  { code: "+44",  flag: "🇬🇧", name: "UK" },
-  { code: "+91",  flag: "🇮🇳", name: "IN" },
-  { code: "+33",  flag: "🇫🇷", name: "FR" },
-  { code: "+966", flag: "🇸🇦", name: "SA" },
-  { code: "+34",  flag: "🇪🇸", name: "ES" },
-  { code: "+971", flag: "🇦🇪", name: "AE" },
-  { code: "+92",  flag: "🇵🇰", name: "PK" },
-  { code: "+880", flag: "🇧🇩", name: "BD" },
-  { code: "+86",  flag: "🇨🇳", name: "CN" },
-];
+const IRAQ_COUNTRY_CODE = "+964";
 
 export default function Register() {
   const navigate = useNavigate();
   const { register, isLoading } = useAuth();
   const { t } = useLanguage();
 
-  const [countryCode, setCountryCode] = useState("+91");
   const [phone, setPhone] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -56,7 +44,7 @@ export default function Register() {
     }
 
     try {
-      const fullPhone = `${countryCode}${phone.trim()}`;
+      const fullPhone = `${IRAQ_COUNTRY_CODE}${phone.trim()}`;
       await register(fullPhone, username, password);
       navigate("/dashboard");
     } catch (err) {
@@ -89,20 +77,12 @@ export default function Register() {
               <div>
                 <label className="text-sm font-medium mb-2 block">Mobile Number</label>
                 <div className="flex gap-2">
-                  <select
-                    value={countryCode}
-                    onChange={(e) => setCountryCode(e.target.value)}
-                    className="h-10 rounded-md border border-border/40 bg-input px-2 text-sm text-white focus:outline-none focus:border-white/60 w-24"
-                  >
-                    {COUNTRY_CODES.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.flag} {c.code}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="h-10 flex items-center justify-center rounded-md border border-border/40 bg-input px-3 text-sm text-white shrink-0">
+                    🇮🇶 +964
+                  </div>
                   <Input
                     type="tel"
-                    placeholder="9876543210"
+                    placeholder="7901234567"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                     disabled={isLoading}
