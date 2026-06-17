@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const PRELOADER_DURATION_MS = 5000;
-const MOBILE_BREAKPOINT = 768;
 
 const CDN_VIDEO = "https://vz-8b014dd7-1d8.b-cdn.net/12f12c0c-4ec8-41c6-a4c6-5afb6704d24e/play_480p.mp4";
 
@@ -18,30 +17,18 @@ export default function Preloader({
   className,
 }: PreloaderProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth < MOBILE_BREAKPOINT : false
-  );
   const [isExiting, setIsExiting] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  // Desktop vs mobile video based on viewport
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  // Play video when source is set
+  // Play video once mounted
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    video.play().catch(() => {
-      // Autoplay may be blocked; video will still show first frame
-    });
-  }, [isMobile]);
+    const tryPlay = () => video.play().catch(() => {});
+    tryPlay();
+    video.addEventListener("canplay", tryPlay);
+    return () => video.removeEventListener("canplay", tryPlay);
+  }, []);
 
   // 5 second timer then fade out and complete
   useEffect(() => {

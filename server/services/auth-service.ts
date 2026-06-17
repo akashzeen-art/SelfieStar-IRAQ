@@ -4,7 +4,7 @@ import { randomBytes } from "crypto";
 import { env } from "../config/env";
 import { User, IUser } from "../models/User";
 import { HttpError } from "../utils/http";
-import { checkSubscriptionStatus } from "../services/mselfistar-service";
+import { checkSubscriptionStatus, toMsisdn } from "../services/mselfistar-service";
 
 /**
  * Authentication Service
@@ -33,7 +33,7 @@ export async function registerUser(input: {
   name?: string;
 }) {
   const email = input.email?.toLowerCase().trim();
-  const phone = input.phone?.trim();
+  const phone = input.phone ? toMsisdn(input.phone.trim()) : undefined;
   const username = input.username.toLowerCase().trim();
   const name = input.name?.trim() || username;
 
@@ -43,7 +43,9 @@ export async function registerUser(input: {
   }
 
   if (phone) {
-    const existingPhone = await User.findOne({ phone }).select("_id").lean();
+    const existingPhone = await User.findOne({
+      phone: { $in: [phone, `+${phone}`] },
+    }).select("_id").lean();
     if (existingPhone) throw new HttpError(409, "Phone number already registered");
   }
 
@@ -80,28 +82,40 @@ export async function registerUser(input: {
 }
 
 /** Create a portal user for a subscribed phone number (Iraq activation flow) */
+async function findUserByPhone(phone: string) {
+  const digits = toMsisdn(phone);
+  if (!digits) return null;
+  return User.findOne({ phone: { $in: [digits, `+${digits}`] } })
+    .select("+password")
+    .lean();
+}
+
 async function findOrCreatePhoneUser(phone: string) {
-  const trimmed = phone.trim();
-  const existing = await User.findOne({ phone: trimmed });
+  const digits = toMsisdn(phone);
+  if (!digits) {
+    throw new HttpError(400, "Invalid mobile number");
+  }
+
+  const existing = await User.findOne({ phone: { $in: [digits, `+${digits}`] } });
   if (existing) return existing;
 
-  const digits = trimmed.replace(/\D/g, "");
-  let username = `iq${digits.slice(-9)}`;
+  let username = `u${digits}`;
+  if (username.length > 30) username = `u${digits.slice(-29)}`;
+
   let suffix = 0;
   while (await User.findOne({ username: suffix ? `${username}${suffix}` : username }).select("_id").lean()) {
     suffix += 1;
     if (suffix > 99) {
-      username = `iq${digits}`;
-      break;
+      throw new HttpError(409, "Could not create account for this number. Please contact support.");
     }
   }
-  if (suffix > 0 && suffix <= 99) username = `${username}${suffix}`;
+  if (suffix > 0) username = `${username}${suffix}`;
 
   const tempPassword = randomBytes(16).toString("hex");
   const user = new User({
     username,
     name: username,
-    phone: trimmed,
+    phone: digits,
     password: tempPassword,
     role: "user",
     totalSelfies: 0,
@@ -114,7 +128,16 @@ async function findOrCreatePhoneUser(phone: string) {
     failedLoginAttempts: 0,
   });
 
-  await user.save();
+  try {
+    await user.save();
+  } catch (error: any) {
+    if (error?.code === 11000) {
+      const retry = await User.findOne({ phone: { $in: [digits, `+${digits}`] } });
+      if (retry) return retry;
+    }
+    throw error;
+  }
+
   return user;
 }
 
@@ -128,13 +151,18 @@ async function findOrCreatePhoneUser(phone: string) {
  * - Role is determined from database and included in JWT
  */
 export async function loginUser(input: { email?: string; phone?: string; password?: string }) {
+  const phoneMsisdn = input.phone ? toMsisdn(input.phone.trim()) : "";
   const identifier = input.phone
-    ? input.phone.trim()
+    ? phoneMsisdn
     : input.email?.toLowerCase().trim();
 
   // Phone login: verify subscription with mselfistar before allowing portal access
   if (input.phone) {
-    const result = await checkSubscriptionStatus(input.phone.trim());
+    if (!phoneMsisdn) {
+      throw new HttpError(400, "Invalid mobile number");
+    }
+
+    const result = await checkSubscriptionStatus(phoneMsisdn);
     if (!result.subscribed) {
       throw new HttpError(403, "Subscription required to access the portal", {
         status: 0,
@@ -143,11 +171,12 @@ export async function loginUser(input: { email?: string; phone?: string; passwor
     }
   }
 
-  const query = input.phone ? { phone: identifier } : { email: identifier };
-  let user = await User.findOne(query).select("+password").lean();
+  let user = input.phone
+    ? await findUserByPhone(phoneMsisdn)
+    : await User.findOne({ email: identifier }).select("+password").lean();
 
   if (!user && input.phone) {
-    const userDoc = await findOrCreatePhoneUser(input.phone.trim());
+    const userDoc = await findOrCreatePhoneUser(phoneMsisdn);
     user = await User.findById(userDoc._id).select("+password").lean();
   }
 
@@ -249,7 +278,7 @@ export function sanitizeUser(user: IUser | { _id: any; username?: string; name: 
     username: "username" in user && user.username ? user.username : user.name, // Use username if available, fallback to name
     name: user.name,
     email: user.email,
-    phone: "phone" in user ? user.phone : undefined,
+    phone: "phone" in user && user.phone ? toMsisdn(String(user.phone)) || user.phone : undefined,
     role: user.role,
     profileImage: "profileImage" in user ? user.profileImage : undefined,
     totalSelfies: "totalSelfies" in user ? user.totalSelfies || 0 : 0,
