@@ -4,7 +4,7 @@ import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  User, Edit2, Save, X, Camera, Star, Trophy, TrendingUp, Award, Calendar,
+  User, Edit2, Save, X, Camera, Star, TrendingUp, Award, Calendar,
   Mail, Shield, Trash2, Upload, Image as ImageIcon, Smartphone, CreditCard, Loader2
 } from "lucide-react";
 import { apiClient } from "@/lib/axios";
@@ -13,18 +13,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSelfies } from "@/contexts/SelfieContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalSelfies } from "@/lib/local-selfies";
 
 interface UserProfile {
   id: string; username: string; email: string; role: string;
   profileImage?: string; totalSelfies: number; totalVideos: number;
-  totalScore: number; challengeWins: number; badges: string[];
+  totalScore: number;   challengeWins: number; badges: string[];
   isVerified: boolean; createdAt: string; lastLogin?: string;
 }
 
 interface UserStats {
   totalSelfies: number; totalVideos: number; totalScore: number;
   averageScore: number; challengeWins: number; badges: string[];
-  leaderboardRank: number;
   selfieStats: { totalSelfies: number; averageScore: number; totalLikes: number; publicSelfies: number; };
   challengesParticipated: number;
 }
@@ -47,6 +47,7 @@ export default function Profile() {
   const [subscription, setSubscription] = useState<SubscriptionAccount | null>(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [unsubscribing, setUnsubscribing] = useState(false);
+  const isPortalUser = Boolean(authUser?.portal || authUser?.phone);
 
   useEffect(() => {
     if (!authUser) { navigate("/login"); return; }
@@ -56,6 +57,42 @@ export default function Profile() {
   const loadProfile = async () => {
     try {
       setIsLoading(true);
+
+      if (authUser?.portal || authUser?.phone) {
+        const localCount = getLocalSelfies().length;
+        setProfile({
+          id: authUser.id,
+          username: authUser.username || authUser.phone || "",
+          email: authUser.email || "",
+          role: "user",
+          totalSelfies: localCount,
+          totalVideos: 0,
+          totalScore: 0,
+          challengeWins: 0,
+          badges: [],
+          isVerified: true,
+          createdAt: authUser.createdAt,
+        });
+        setStats({
+          totalSelfies: localCount,
+          totalVideos: 0,
+          totalScore: 0,
+          averageScore: 0,
+          challengeWins: 0,
+          badges: [],
+          selfieStats: { totalSelfies: localCount, averageScore: 0, totalLikes: 0, publicSelfies: 0 },
+          challengesParticipated: 0,
+        });
+        setFormData({
+          username: authUser.username || "",
+          name: authUser.username || "",
+          profileImage: authUser.profileImage || "",
+        });
+        await refreshMine();
+        await loadSubscription();
+        return;
+      }
+
       const [profileRes, statsRes] = await Promise.all([
         apiClient.get("/user/profile"),
         apiClient.get("/user/stats"),
@@ -267,12 +304,18 @@ export default function Profile() {
                     )}
                   </div>
                   <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2"><Mail className="h-4 w-4" /><span>{profile.email}</span></div>
+                    {isPortalUser && authUser?.phone ? (
+                      <div className="flex items-center gap-2"><Smartphone className="h-4 w-4" /><span>+{authUser.phone}</span></div>
+                    ) : profile.email ? (
+                      <div className="flex items-center gap-2"><Mail className="h-4 w-4" /><span>{profile.email}</span></div>
+                    ) : null}
                     <div className="flex items-center gap-2"><Calendar className="h-4 w-4" /><span>{t.profile.joined} {new Date(profile.createdAt).toLocaleDateString()}</span></div>
                   </div>
+                  {!isPortalUser && (
                   <Button onClick={() => setIsEditing(true)} variant="outline" className="mt-4">
                     <Edit2 className="h-4 w-4 mr-2" />{t.profile.editProfile}
                   </Button>
+                  )}
                 </div>
               )}
             </div>
@@ -358,16 +401,11 @@ export default function Profile() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="rounded-lg border border-border/40 bg-transparent backdrop-blur-sm p-4 text-center">
             <Star className="h-6 w-6 text-neon-purple mx-auto mb-2" />
             <div className="text-2xl font-bold">{stats.totalSelfies}</div>
             <div className="text-xs text-muted-foreground">{t.profile.totalSelfies}</div>
-          </div>
-          <div className="rounded-lg border border-border/40 bg-transparent backdrop-blur-sm p-4 text-center">
-            <Trophy className="h-6 w-6 text-yellow-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">#{stats.leaderboardRank}</div>
-            <div className="text-xs text-muted-foreground">{t.profile.rank}</div>
           </div>
           <div className="rounded-lg border border-border/40 bg-transparent backdrop-blur-sm p-4 text-center">
             <TrendingUp className="h-6 w-6 text-green-500 mx-auto mb-2" />

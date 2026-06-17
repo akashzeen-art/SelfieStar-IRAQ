@@ -10,6 +10,7 @@ export interface User {
   email: string;
   username: string;
   phone?: string;
+  portal?: boolean;
   profileImage?: string;
   role: "user";
   createdAt: string;
@@ -102,18 +103,6 @@ export interface ChallengeSubmission {
   submittedAt: string;
 }
 
-// Leaderboard Types
-export interface LeaderboardEntry {
-  rank: number;
-  userId: string;
-  username: string;
-  profileImage?: string;
-  totalScore: number;
-  totalSelfies: number;
-  averageScore: number;
-  challengeWins: number;
-}
-
 // Community Types
 export interface CommunityPost {
   id: string;
@@ -203,17 +192,6 @@ export interface SelfieDto {
   comments: number;
   createdAt: string;
   mediaToken?: string; // Legacy token-based access (deprecated, use imageUrl)
-}
-
-export interface LeaderboardDto {
-  rank: number;
-  userId: string;
-  username: string;
-  profileImage?: string;
-  totalScore: number;
-  totalSelfies: number;
-  averageScore: number;
-  challengeWins: number;
 }
 
 export interface ChallengeParticipationDto {

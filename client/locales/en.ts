@@ -16,7 +16,7 @@ const en = {
     feature1Title: "AI-Powered Scoring",
     feature1Desc: "Advanced AI analyzes facial symmetry, lighting, and expression to give you an accurate star rating from 0-100.",
     feature2Title: "Daily Challenges",
-    feature2Desc: "Compete in themed challenges, submit your best selfies, and climb the global leaderboard to become a legend.",
+    feature2Desc: "Compete in themed challenges and submit your best selfies to become a legend.",
     feature3Title: "Thriving Community",
     feature3Desc: "Share your selfies, engage with millions of users, collect likes and comments, and build your fanbase.",
     selfiesScored: "Selfies Scored",
@@ -85,7 +85,7 @@ const en = {
     tip2: "✓ Center your face for better analysis",
     tip3: "✓ Natural smile increases ratings",
     nextChallenge: "Next Challenge",
-    nextChallengeDesc: "Check out active challenges to win rewards and climb the leaderboard",
+    nextChallengeDesc: "Check out active challenges to win rewards",
     viewChallenges: "View Challenges →",
   },
   challenges: {

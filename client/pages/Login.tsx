@@ -2,11 +2,13 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader } from "lucide-react";
-import { useAuth, AuthError } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import VideoBackground from "@/components/VideoBackground";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { apiClient } from "@/lib/axios";
+import { SubscriptionStatusResponse } from "@shared/api";
 
 const IRAQ_COUNTRY_CODE = "+964";
 
@@ -20,6 +22,16 @@ export default function Login() {
   const [error, setError] = useState("");
   const [redirecting, setRedirecting] = useState(false);
   const [showInactivePopup, setShowInactivePopup] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const msisdn = (params.get("msisdn") || params.get("phone") || "").trim();
+    if (!msisdn) return;
+
+    const digits = msisdn.replace(/\D/g, "");
+    const local = digits.startsWith("964") ? digits.slice(3) : digits;
+    if (local) setPhone(local);
+  }, [location.search]);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -45,14 +57,26 @@ export default function Login() {
     const fullPhone = `${IRAQ_COUNTRY_CODE}${phone.trim()}`;
 
     try {
-      await login(fullPhone, "", true);
-    } catch (err: any) {
-      if (err instanceof AuthError && err.redirectUrl) {
-        setRedirecting(true);
-        window.location.href = err.redirectUrl;
+      setRedirecting(true);
+      const statusRes = await apiClient.get<SubscriptionStatusResponse>("/subscription/check-status", {
+        params: { msisdn: fullPhone },
+      });
+
+      if (statusRes.data.status === 0 && statusRes.data.redirectUrl) {
+        window.location.href = statusRes.data.redirectUrl;
         return;
       }
-      const msg = err instanceof Error ? err.message : "Login failed.";
+
+      if (statusRes.data.status !== 1) {
+        setError("Subscription required to access the portal");
+        setRedirecting(false);
+        return;
+      }
+
+      await login(fullPhone, "", true);
+    } catch (err: any) {
+      setRedirecting(false);
+      const msg = err.response?.data?.message || (err instanceof Error ? err.message : "Login failed.");
       if (msg.toLowerCase().includes("not active") || msg.toLowerCase().includes("blocked")) {
         setShowInactivePopup(true);
       } else {

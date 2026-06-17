@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
-import SelfieUploadModal from "@/components/SelfieUploadModal";
 import { Button } from "@/components/ui/button";
 import { Camera, Star, TrendingUp, Award, Trash2, Heart } from "lucide-react";
 import { useSelfies } from "@/contexts/SelfieContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Dashboard() {
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const navigate = useNavigate();
   const [error, setError] = useState("");
   const { selfies, getAverageScore, getBestScore, deleteSelfie, refreshMine } = useSelfies();
   const { t } = useLanguage();
@@ -42,24 +41,16 @@ export default function Dashboard() {
           <Camera className="h-16 w-16 text-white mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-2">{t.dashboard.readyToScore}</h2>
           <p className="text-muted-foreground mb-6">
-            Upload a photo and let our AI analyze your star potential
+            Capture a selfie with your camera and save it directly to your device
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
-              onClick={() => setIsUploadModalOpen(true)}
+              onClick={() => navigate("/upload")}
               className="bg-white text-black hover:bg-white/90 border border-white/30 px-8 py-2 text-base hover:scale-105 transition-transform shadow-lg shadow-white/20"
             >
               <Camera className="mr-2 h-5 w-5" />
-              {t.dashboard.quickUpload}
+              Capture Selfie
             </Button>
-            <Link to="/upload">
-              <Button
-                variant="outline"
-                className="border-white/30 hover:bg-white/10 text-white px-8 py-2 text-base hover:scale-105 transition-transform"
-              >
-                {t.dashboard.fullUploadPage}
-              </Button>
-            </Link>
           </div>
         </div>
 
@@ -174,9 +165,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* Upload Modal */}
-      <SelfieUploadModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} />
     </AppLayout>
   );
 }

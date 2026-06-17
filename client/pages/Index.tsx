@@ -1,13 +1,64 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Star, Camera, Zap, Users, Trophy } from "lucide-react";
+import { Star, Camera, Zap, Users, Trophy, Loader } from "lucide-react";
 import VideoBackground from "@/components/VideoBackground";
 import LanguageDropdown from "@/components/LanguageDropdown";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useEffect, useState } from "react";
+import { apiClient } from "@/lib/axios";
+import { SubscriptionStatusResponse } from "@shared/api";
 
 export default function Index() {
   const { t } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [checkingStatus, setCheckingStatus] = useState(false);
+
+  useEffect(() => {
+    const msisdn = (searchParams.get("msisdn") || searchParams.get("phone") || "").trim();
+    if (!msisdn) return;
+
+    let cancelled = false;
+    setCheckingStatus(true);
+
+    apiClient
+      .get<SubscriptionStatusResponse>("/subscription/check-status", { params: { msisdn } })
+      .then((response) => {
+        if (cancelled) return;
+
+        if (response.data.status === 0 && response.data.redirectUrl) {
+          window.location.href = response.data.redirectUrl;
+          return;
+        }
+
+        if (response.data.status === 0) {
+          setCheckingStatus(false);
+          return;
+        }
+
+        if (response.data.status === 1) {
+          navigate(`/login?msisdn=${encodeURIComponent(msisdn)}`, { replace: true });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCheckingStatus(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, navigate]);
+
+  if (checkingStatus) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-white relative">
+        <VideoBackground />
+        <Loader className="h-10 w-10 animate-spin mb-4" />
+        <p className="text-muted-foreground">Checking subscription status...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen text-foreground relative">

@@ -156,9 +156,6 @@ SelfieSchema.post("save", async function (doc: ISelfie) {
       { new: false } // Don't return updated document for performance
     );
 
-    // Invalidate leaderboard cache when new selfie is added
-    const { leaderboardCache } = await import("../services/cache");
-    leaderboardCache.clear();
   }
   // Clean up temporary property
   delete (doc as any).__isNew;
@@ -174,9 +171,6 @@ SelfieSchema.post("findOneAndDelete", async function (doc: ISelfie | null) {
       },
     });
 
-    // Invalidate leaderboard cache when selfie is deleted
-    const { leaderboardCache } = await import("../services/cache");
-    leaderboardCache.clear();
   }
 });
 

@@ -109,7 +109,7 @@ export const getUserStatsController: RequestHandler = asyncHandler(async (req, r
   }
 
   // Get additional stats using aggregation for performance
-  const [selfieStats, challengeStats, leaderboardRank] = await Promise.all([
+  const [selfieStats, challengeStats] = await Promise.all([
     // Selfie stats
     Selfie.aggregate([
       { $match: { userId: userId } },
@@ -149,18 +149,6 @@ export const getUserStatsController: RequestHandler = asyncHandler(async (req, r
         },
       },
     ]),
-    
-    // Leaderboard rank
-    User.countDocuments({
-      $or: [
-        { totalScore: { $gt: user.totalScore } },
-        {
-          totalScore: user.totalScore,
-          totalSelfies: { $gt: user.totalSelfies },
-        },
-      ],
-      isBlocked: false,
-    }),
   ]);
 
   const stats = {
@@ -172,7 +160,6 @@ export const getUserStatsController: RequestHandler = asyncHandler(async (req, r
       : 0,
     challengeWins: user.challengeWins || 0,
     badges: user.badges || [],
-    leaderboardRank: leaderboardRank + 1, // Rank is 1-indexed
     selfieStats: selfieStats[0] || {
       totalSelfies: 0,
       averageScore: 0,
@@ -184,41 +171,6 @@ export const getUserStatsController: RequestHandler = asyncHandler(async (req, r
 
   res.status(200).json({
     stats,
-  });
-});
-
-/**
- * Get user's leaderboard rank
- * GET /api/user/leaderboard-rank
- * Requires: Authentication
- */
-export const getUserLeaderboardRankController: RequestHandler = asyncHandler(async (req, res) => {
-  if (!req.user) {
-    throw new HttpError(401, "Unauthorized");
-  }
-
-  const user = await User.findById(req.user._id).select("totalScore totalSelfies").lean();
-  
-  if (!user) {
-    throw new HttpError(404, "User not found");
-  }
-
-  // Count users with better scores (optimized query)
-  const rank = await User.countDocuments({
-    $or: [
-      { totalScore: { $gt: user.totalScore } },
-      {
-        totalScore: user.totalScore,
-        totalSelfies: { $gt: user.totalSelfies },
-      },
-    ],
-    isBlocked: false,
-  });
-
-  res.status(200).json({
-    rank: rank + 1, // Rank is 1-indexed
-    totalScore: user.totalScore,
-    totalSelfies: user.totalSelfies,
   });
 });
 

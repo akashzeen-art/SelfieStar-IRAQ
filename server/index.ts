@@ -5,7 +5,6 @@ import authRoutes from "./routes/auth";
 import challengeRoutes from "./routes/challenges";
 import userChallengeRoutes from "./routes/user-challenges";
 import selfieRoutes from "./routes/selfies";
-import leaderboardRoutes from "./routes/leaderboard";
 import videoRoutes from "./routes/video";
 import userRoutes from "./routes/user";
 import friendRoutes from "./routes/friends";
@@ -59,7 +58,6 @@ export function createServer() {
   app.use("/api/challenges", challengeRoutes); // Legacy challenge routes (for compatibility)
   app.use("/api/challenge", userChallengeRoutes); // User-driven challenge routes
   app.use("/api/selfies", selfieRoutes);
-  app.use("/api/leaderboard", leaderboardRoutes);
   app.use("/api/video", videoRoutes);
   app.use("/api/filters", filterRoutes);
   app.use("/api/subscription", subscriptionRoutes);

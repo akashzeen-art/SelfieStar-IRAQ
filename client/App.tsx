@@ -16,7 +16,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Challenges from "./pages/Challenges";
-import Leaderboard from "./pages/Leaderboard";
 import UploadSelfie from "./pages/UploadSelfie";
 import Profile from "./pages/Profile";
 import CreateChallenge from "./pages/CreateChallenge";
@@ -69,14 +68,6 @@ const App = () => {
                 element={
                   <ProtectedRoute requireRole="user">
                     <Challenges />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/leaderboard"
-                element={
-                  <ProtectedRoute requireRole="user">
-                    <Leaderboard />
                   </ProtectedRoute>
                 }
               />

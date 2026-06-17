@@ -3,7 +3,6 @@ import {
   getUserProfileController,
   updateUserProfileController,
   getUserStatsController,
-  getUserLeaderboardRankController,
   deleteUserAccountController,
 } from "../controllers/user-controller";
 import { requireAuth } from "../middleware/auth";
@@ -29,9 +28,6 @@ router.put("/update", validateUpdateProfile, validate, updateUserProfileControll
 
 // Get user statistics
 router.get("/stats", getUserStatsController);
-
-// Get user's leaderboard rank
-router.get("/leaderboard-rank", getUserLeaderboardRankController);
 
 // Delete user account
 router.delete("/delete-account", deleteUserAccountController);

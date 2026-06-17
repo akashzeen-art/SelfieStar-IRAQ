@@ -1,4 +1,4 @@
-import { body, param, query, ValidationChain, validationResult } from "express-validator";
+import { body, param, ValidationChain, validationResult } from "express-validator";
 import { Request, Response, NextFunction } from "express";
 import { HttpError } from "../utils/http";
 
@@ -207,18 +207,6 @@ export const validateComment = [
     .isLength({ min: 1, max: 500 })
     .withMessage("Comment must be between 1 and 500 characters")
     .escape(), // XSS prevention
-  validate,
-];
-
-/**
- * Leaderboard Validation
- */
-export const validateLeaderboardQuery = [
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage("Limit must be between 1 and 100")
-    .toInt(),
   validate,
 ];
 

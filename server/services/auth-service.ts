@@ -1,6 +1,5 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { randomBytes } from "crypto";
 import { env } from "../config/env";
 import { User, IUser } from "../models/User";
 import { HttpError } from "../utils/http";
@@ -13,10 +12,77 @@ import { checkSubscriptionStatus, toMsisdn } from "../services/mselfistar-servic
  */
 
 type AuthTokenPayload = {
-  sub: string; // User ID
+  sub: string;
   role: IUser["role"];
   email: string;
+  phone?: string;
+  portal?: boolean;
 };
+
+function sanitizePortalUser(msisdn: string) {
+  return {
+    id: msisdn,
+    username: msisdn,
+    name: msisdn,
+    email: "",
+    phone: msisdn,
+    portal: true,
+    role: "user" as const,
+    profileImage: undefined,
+    totalSelfies: 0,
+    totalVideos: 0,
+    totalScore: 0,
+    challengeWins: 0,
+    averageScore: 0,
+    badges: [] as string[],
+    isVerified: true,
+    lastLogin: undefined,
+    createdAt: new Date().toISOString(),
+    isBlocked: false,
+  };
+}
+
+function issuePortalToken(msisdn: string) {
+  const payload: AuthTokenPayload = {
+    sub: `portal:${msisdn}`,
+    role: "user",
+    email: "",
+    phone: msisdn,
+    portal: true,
+  };
+  const token = jwt.sign(payload, env.jwtSecret, { expiresIn: "7d" });
+  return { token, user: sanitizePortalUser(msisdn) };
+}
+
+function buildPortalAuthUser(msisdn: string): IUser {
+  const now = new Date();
+  return {
+    _id: msisdn as unknown as IUser["_id"],
+    username: msisdn,
+    name: msisdn,
+    email: "",
+    phone: msisdn,
+    password: "",
+    role: "user",
+    totalSelfies: 0,
+    totalVideos: 0,
+    totalScore: 0,
+    challengeWins: 0,
+    challengesCreated: 0,
+    friends: [],
+    badges: [],
+    isBlocked: false,
+    isVerified: true,
+    failedLoginAttempts: 0,
+    createdAt: now,
+    updatedAt: now,
+    averageScore: 0,
+    isLocked: false,
+    comparePassword: async () => false,
+    incrementLoginAttempts: async () => {},
+    resetLoginAttempts: async () => {},
+  } as unknown as IUser;
+}
 
 /**
  * Register a new user
@@ -81,83 +147,10 @@ export async function registerUser(input: {
   return issueAuthToken(user);
 }
 
-/** Create a portal user for a subscribed phone number (Iraq activation flow) */
-async function findUserByPhone(phone: string) {
-  const digits = toMsisdn(phone);
-  if (!digits) return null;
-  return User.findOne({ phone: { $in: [digits, `+${digits}`] } })
-    .select("+password")
-    .lean();
-}
-
-async function findOrCreatePhoneUser(phone: string) {
-  const digits = toMsisdn(phone);
-  if (!digits) {
-    throw new HttpError(400, "Invalid mobile number");
-  }
-
-  const existing = await User.findOne({ phone: { $in: [digits, `+${digits}`] } });
-  if (existing) return existing;
-
-  let username = `u${digits}`;
-  if (username.length > 30) username = `u${digits.slice(-29)}`;
-
-  let suffix = 0;
-  while (await User.findOne({ username: suffix ? `${username}${suffix}` : username }).select("_id").lean()) {
-    suffix += 1;
-    if (suffix > 99) {
-      throw new HttpError(409, "Could not create account for this number. Please contact support.");
-    }
-  }
-  if (suffix > 0) username = `${username}${suffix}`;
-
-  const tempPassword = randomBytes(16).toString("hex");
-  const user = new User({
-    username,
-    name: username,
-    phone: digits,
-    password: tempPassword,
-    role: "user",
-    totalSelfies: 0,
-    totalVideos: 0,
-    totalScore: 0,
-    challengeWins: 0,
-    badges: [],
-    isBlocked: false,
-    isVerified: true,
-    failedLoginAttempts: 0,
-  });
-
-  try {
-    await user.save();
-  } catch (error: any) {
-    if (error?.code === 11000) {
-      const retry = await User.findOne({ phone: { $in: [digits, `+${digits}`] } });
-      if (retry) return retry;
-    }
-    throw error;
-  }
-
-  return user;
-}
-
-/**
- * Login user (supports both users and admins)
- * - Finds user by email (indexed query)
- * - Verifies password with bcrypt
- * - Checks if account is blocked
- * - Allows both "user" and "admin" roles
- * - Returns JWT token and sanitized user data
- * - Role is determined from database and included in JWT
- */
+/** Iraq portal login: mselfistar API only — no MongoDB user record */
 export async function loginUser(input: { email?: string; phone?: string; password?: string }) {
-  const phoneMsisdn = input.phone ? toMsisdn(input.phone.trim()) : "";
-  const identifier = input.phone
-    ? phoneMsisdn
-    : input.email?.toLowerCase().trim();
-
-  // Phone login: verify subscription with mselfistar before allowing portal access
   if (input.phone) {
+    const phoneMsisdn = toMsisdn(input.phone.trim());
     if (!phoneMsisdn) {
       throw new HttpError(400, "Invalid mobile number");
     }
@@ -169,19 +162,15 @@ export async function loginUser(input: { email?: string; phone?: string; passwor
         redirectUrl: "redirectUrl" in result ? result.redirectUrl : undefined,
       });
     }
+
+    return issuePortalToken(phoneMsisdn);
   }
 
-  let user = input.phone
-    ? await findUserByPhone(phoneMsisdn)
-    : await User.findOne({ email: identifier }).select("+password").lean();
-
-  if (!user && input.phone) {
-    const userDoc = await findOrCreatePhoneUser(phoneMsisdn);
-    user = await User.findById(userDoc._id).select("+password").lean();
-  }
+  const identifier = input.email?.toLowerCase().trim();
+  const user = await User.findOne({ email: identifier }).select("+password").lean();
 
   if (!user) {
-    throw new HttpError(401, "No account found with this mobile number.");
+    throw new HttpError(401, "No account found with this email.");
   }
 
   if (user.isBlocked) {
@@ -213,10 +202,12 @@ export async function loginUser(input: { email?: string; phone?: string; passwor
  * - Signed with JWT_SECRET from environment
  */
 function issueAuthToken(user: IUser) {
+  const phone = user.phone ? toMsisdn(user.phone) : undefined;
   const payload: AuthTokenPayload = {
     sub: user._id.toString(),
     role: user.role,
     email: user.email || "",
+    ...(phone ? { phone, portal: false } : {}),
   };
 
   // Token expires in 7 days (good balance for user experience and security)
@@ -238,7 +229,7 @@ function issueAuthToken(user: IUser) {
  */
 export async function verifyToken(token: string): Promise<IUser> {
   let decoded: AuthTokenPayload;
-  
+
   try {
     decoded = jwt.verify(token, env.jwtSecret) as AuthTokenPayload;
   } catch (error) {
@@ -249,6 +240,10 @@ export async function verifyToken(token: string): Promise<IUser> {
       throw new HttpError(401, "Invalid token");
     }
     throw new HttpError(401, "Token verification failed");
+  }
+
+  if (decoded.portal && decoded.phone) {
+    return buildPortalAuthUser(decoded.phone);
   }
 
   // Find user by ID (optimized query with index)
@@ -269,7 +264,7 @@ export async function verifyToken(token: string): Promise<IUser> {
  * - Removes sensitive fields (password)
  * - Returns only safe user information
  */
-export function sanitizeUser(user: IUser | { _id: any; username?: string; name: string; email: string; role: string; createdAt: Date; isBlocked: boolean; totalSelfies?: number; totalVideos?: number; totalScore?: number; challengeWins?: number; badges?: string[]; profileImage?: string; isVerified?: boolean; lastLogin?: Date }) {
+export function sanitizeUser(user: IUser | { _id: any; username?: string; name: string; email: string; role: string; createdAt: Date; isBlocked: boolean; phone?: string; portal?: boolean; totalSelfies?: number; totalVideos?: number; totalScore?: number; challengeWins?: number; badges?: string[]; profileImage?: string; isVerified?: boolean; lastLogin?: Date }) {
   const totalMedia = ("totalSelfies" in user ? user.totalSelfies || 0 : 0) + ("totalVideos" in user ? user.totalVideos || 0 : 0);
   const totalScore = "totalScore" in user ? user.totalScore || 0 : 0;
   
@@ -279,6 +274,7 @@ export function sanitizeUser(user: IUser | { _id: any; username?: string; name: 
     name: user.name,
     email: user.email,
     phone: "phone" in user && user.phone ? toMsisdn(String(user.phone)) || user.phone : undefined,
+    portal: Boolean(user.phone && !user.email),
     role: user.role,
     profileImage: "profileImage" in user ? user.profileImage : undefined,
     totalSelfies: "totalSelfies" in user ? user.totalSelfies || 0 : 0,
