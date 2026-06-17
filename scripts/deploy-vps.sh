@@ -43,4 +43,5 @@ pm2 save
 
 log "Deployment complete"
 pm2 status "$APP_NAME"
-printf '\nHealth check: curl -s http://127.0.0.1:3001/api/health\n'
+printf '\nDeployed commit: %s\n' "$(git rev-parse --short HEAD)"
+printf 'Health check: curl -s http://127.0.0.1:3001/api/health\n'
